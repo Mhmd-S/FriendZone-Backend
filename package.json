@@ -1,0 +1,28 @@
+{
+  "name": "apex_server",
+  "version": "0.0.1",
+  "description": "Server prototpye for the AP exchange website",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon --exec babel-node ./app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@babel/core": "^7.21.8",
+    "@babel/node": "^7.20.7",
+    "nodemon": "^2.0.22"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-validator": "^7.0.1",
+    "mongoose": "^7.2.1",
+    "passport": "^0.6.0",
+    "passport-jwt": "^4.0.1",
+    "passport-local": "^1.0.0"
+  }
+}
