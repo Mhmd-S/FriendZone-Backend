@@ -3,6 +3,7 @@ import express from 'express';
 import {mongoose} from 'mongoose';
 import cors from 'cors';
 import passport from 'passport';
+import session from 'express-session';
 
 import { errorHandlers } from './utils/errorHandler';
 
@@ -29,7 +30,9 @@ const corsOption = { // Change later. // Config for the CORS
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
+app.use(session({ secret: process.env.session_secret, resave:false, saveUninitialized:true }));
 app.use(passport.initialize());
+app.use(passport.session());
 
 // Routers
 
