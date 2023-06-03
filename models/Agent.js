@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const AgentSchema = mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const AgentSchema = new Schema({
     email:{
         type: String,
         required: true,
@@ -18,7 +20,7 @@ const AgentSchema = mongoose.Schema({
         required: true,
     },
     institution: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Institution",
         required: true,
     },

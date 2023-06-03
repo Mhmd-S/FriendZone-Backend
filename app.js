@@ -2,10 +2,12 @@ import 'dotenv/config';
 import express from 'express';
 import {mongoose} from 'mongoose';
 import cors from 'cors';
-import passport from 'passport';
 import session from 'express-session';
-
+import configurePassport from './authentication/passport-config';
 import { errorHandlers } from './utils/errorHandler';
+
+// Import routers
+import StudentRouter from './routes/StudentRouter';
 
 const app = express();
 
@@ -26,6 +28,9 @@ const corsOption = { // Change later. // Config for the CORS
     'optionsSuccessStatus': 204
   }
 
+// Configuring passport
+const passport = configurePassport();  
+
 // Global middleware
 app.use(cors(corsOption));
 app.use(express.json());
@@ -35,6 +40,8 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routers
+app.use('/student', StudentRouter);
+
 
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {

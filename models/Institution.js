@@ -1,5 +1,7 @@
 import mongoose from "mongoose";
 
+const Schema = mongoose.Schema;
+
 const InstitutionSchema = new mongoose.Schema({
     name:{
         type: String,
@@ -11,7 +13,7 @@ const InstitutionSchema = new mongoose.Schema({
         enum: ['University', 'College', 'School', 'Other'],
     },
     address: {
-        type: [mongoose.Schema.types.ObjectId],
+        type: [Schema.types.ObjectId],
         ref: "Course",
         required: true
     },
@@ -32,7 +34,7 @@ const InstitutionSchema = new mongoose.Schema({
         require: true,
     },
     agents: {
-        type: [mongoose.Schema.types.ObjectId],
+        type: [Schema.types.ObjectId],
         required: true,
         ref: "Agent",
     }

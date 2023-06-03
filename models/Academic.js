@@ -1,6 +1,8 @@
 import mongoose from "mongoose";
 
-const GradeSchema = mongoose.Schema({
+const Schema = mongoose.Schema;
+
+const GradeSchema = new Schema({
     subject: {
       type: String,
       required: true
@@ -11,8 +13,7 @@ const GradeSchema = mongoose.Schema({
     }
   });
 
-
-const AcademicSchema = mongoose.Schema({
+const AcademicSchema = new Schema({
     academic_name: {
         type: String,
         enum: ["STP", "STPM", "UEC", "O Level", "A Level", "IB", "Certificate", "Diploma", "Degree", "Masters", "PhD"],
@@ -23,7 +24,7 @@ const AcademicSchema = mongoose.Schema({
         required: true,
       },
       student: {
-        type: mongoose.Schema.Types.ObjectId,
+        type: Schema.Types.ObjectId,
         ref: "Student",
       },
       file: {
