@@ -8,6 +8,7 @@ const router = express.Router();
 
 router.post("/register", StudentController.createStudent);
 router.post("/login", StudentController.login);
+router.put("/updateAcademic", StudentController.updateAcademic);
 
 export default router;
 

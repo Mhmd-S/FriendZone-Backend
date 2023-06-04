@@ -1,5 +1,6 @@
 import bcrypt from 'bcryptjs';
 import Student from '../models/Student';
+import Academic from '../models/Academic';
 import { AppError } from '../utils/errorHandler';
 
 const getStudent = async(studentId) => {
@@ -29,6 +30,17 @@ const createStudent = async(studentObj) => {
                 throw new AppError(500, "User couldn't be created");
             });
     } );
+}
+
+const addAcademicRecord = async(studentId, academicObj) => {
+    const academicRecord  = new Academic({...academicObj});
+    const result = await Student.findByIdAndUpdate({ _id: studentId},
+                                                    { $push: { academicRecord } }).exec();
+    if (result === null) {
+        throw new AppError(404, "User not found");
+    }else {
+         return result;
+    }
 }
 
 export { createStudent, getStudent };

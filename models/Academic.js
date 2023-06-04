@@ -11,27 +11,31 @@ const GradeSchema = new Schema({
       type: String,
       required: true
     }
-  });
+});
 
 const AcademicSchema = new Schema({
-    academic_name: {
+    academicName: {
         type: String,
         enum: ["STP", "STPM", "UEC", "O Level", "A Level", "IB", "Certificate", "Diploma", "Degree", "Masters", "PhD"],
-        required: true
+        required: true,
       },
       results: {
-        grades: [GradeSchema],
+        type: [GradeSchema],
         required: true,
       },
       student: {
         type: Schema.Types.ObjectId,
         ref: "Student",
+        required: true
       },
       file: {
+        type: Schema.Types.Buffer,
         data: Buffer,
-        contentType: String
-    },
+        contentType: String,
+        required: true,
+      },
     
 }, { timestamps: true })
 
-export const Academic = mongoose.model("Academic", AcademicSchema);
+const Academic = mongoose.model("Academic", AcademicSchema);
+export default Academic; 

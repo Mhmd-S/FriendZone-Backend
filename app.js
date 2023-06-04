@@ -4,7 +4,7 @@ import {mongoose} from 'mongoose';
 import cors from 'cors';
 import session from 'express-session';
 import configurePassport from './authentication/passport-config';
-import { errorHandlers } from './utils/errorHandler';
+import { AppError, errorHandlers } from './utils/errorHandler';
 
 // Import routers
 import StudentRouter from './routes/StudentRouter';
@@ -45,7 +45,7 @@ app.use('/student', StudentRouter);
 
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {
-    next(createHttpError(404));
+    next(new AppError(400, 'Not Found'));
 });
 
 app.use((err,req,res,next) => {

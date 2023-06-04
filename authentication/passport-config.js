@@ -14,19 +14,23 @@ const configurePassport = () => {
   }, async (username, password, done) => {
       try {
           const student = await Student.findOne({ email: username }).exec();
+          
           if (!student) {
               return done(null, false, { message: 'Invalid email or password' });
           }
-          bcrypt.compare(password, student.password, (err, res) => {
+
+          return bcrypt.compare(password, student.password)
+            .then((res) => {
               if (res) {
-                // passwords match! log user in
-                return done(null, student)
+                const { _id, email, firstName, lastName } = student;
+                return done(null, { _id, email, firstName, lastName });
               } else {
-                // passwords do not match!
-                return done(null, false, { message: "Incorrect password" })
+                return done(null, false, { message: "Incorrect password" });
               }
             })
-          return done(null, student);
+            .catch((error) => {
+              return done(error);
+            });
       } catch (error) {
           return done(error);
       }
@@ -39,19 +43,23 @@ const configurePassport = () => {
   }, async (username, password, done) => {
       try {
           const admin = await Admin.findOne({ username });
+          
           if (!admin) {
               return done(null, false, { message: 'Invalid email or password' });
           }
-          bcrypt.compare(password, user.password, (err, res) => {
+          
+          return bcrypt.compare(password, user.password)
+            .then((res) => {
               if (res) {
                 // passwords match! log user in
-                return done(null, user)
+                return done(null, user) // Change the user to display only a certain fields, like the student
               } else {
                 // passwords do not match!
                 return done(null, false, { message: "Incorrect password" })
               }
+            }).catch((error) => {
+              return done(error);
             })
-          return done(null, admin);
       } catch (error) {
           return done(error);
       }
@@ -64,10 +72,13 @@ const configurePassport = () => {
   }, async (username, password, done) => {
       try {
           const agent = await Agent.findOne({ username });
+          
           if (!agent) {
               return done(null, false, { message: 'Invalid email or password' });
           }
-          bcrypt.compare(password, user.password, (err, res) => {
+
+          return bcrypt.compare(password, user.password)
+            .then((res) => {
               if (res) {
                 // passwords match! log user in
                 return done(null, user)
@@ -75,8 +86,9 @@ const configurePassport = () => {
                 // passwords do not match!
                 return done(null, false, { message: "Incorrect password" })
               }
+            }).catch((error) => {
+              return done(error);
             })
-          return done(null, agent);
       } catch (error) {
           return done(error);
       }

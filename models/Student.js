@@ -30,7 +30,11 @@ const StudentSchema = new Schema({
     academics: {
         type: [Schema.Types.ObjectId],
         ref: "Academic",
-    }  
+    },
+    persoalStatement: {
+        type: String,
+        default: "",
+    },  
 }, { timestamps: true })
 
 const Student = mongoose.model("Student", StudentSchema);
