@@ -4,7 +4,7 @@ import { AppError } from '../utils/errorHandler';
 import Student from '../models/Student';
 import passport from 'passport';
 import '../authentication/passport-config';
-import { validateSPM } from '../utils/resultValidation';
+import { validateSPM, validateSTPM } from '../utils/resultValidation';
 
 const createStudent = [
     body('email')
@@ -73,6 +73,8 @@ const updateAcademic = [ // TODO: Add validation for other academics
         .isJSON().withMessage('Results is not valid')
         .if(body('academics').equals('SPM'))
         .custom((value, { req } ) => validateSPM(value))
+        .if(body('academics').equals('STPM'))
+        .custom((value, { req }) => validateSTPM(value))
     ,
     async(req, res, next) => {
         try{

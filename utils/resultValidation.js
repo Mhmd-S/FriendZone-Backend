@@ -1,7 +1,11 @@
 // Results is an JSON with the following structure:
 // {"Bahasa Melayu" : "A+", "Sejarah":"C"} 
+
 const validateSPM = (results) => {
-    if (results.length < 10 || results.length > 12) throw new Error("SPM results must be between 10 to 12 subjects");
+
+    results = JSON.parse(results);
+
+    if (results.keys().length < 10 || results.keys().length > 12) throw new Error("SPM results must be between 10 to 12 subjects");
 
     const requiredSubjects = [
     "Bahasa Melayu", 
@@ -59,4 +63,36 @@ const validateSPM = (results) => {
     });
 }
 
-export { validateSPM };
+const validateSTPM = (results) => {
+    results = JSON.parse(results);
+    if (results.keys().length < 4 || results.keys().length > 5) throw new Error("STPM results must be between 3 to 5 subjects");
+
+    const subjects = ["Pengajian Am", "Bahasa Melayu", "Bahasa Cina", "Bahasa Tamil", "Bahasa Arab", "Literature in English", "Kesusasteraan Melayu Komunikatif", "Syariah", "Usuluddin", "Tahfiz Al-Quran", "Sejarah", "Geografi", "Ekonomi", "Pengajian Perniagaan", "Perakaunan", "Mathematics (Management)", "Mathematics (Technical)", "Information and Communications Technology", "Physics", "Chemistry", "Biology", "Sains Sukan", "Seni Visual"]
+
+    const grades = ["A", "A-", "B+", "B", "B-", "C+", "C", "C-", "D+", "D", "F"];
+
+    // Check if all subjects are valid
+    Object.keys(results).forEach(subject => {
+        if(!subjects.includes(subject)) {
+            throw new Error(`${subject} is not a valid STPM subject`);
+        }
+    });
+
+    // Check if all grades are valid
+    Object.values(results).forEach(grade => {
+        if(!grades.includes(grade)) {
+            throw new Error(`${grade} is not a valid STPM grade`);
+        }
+    });
+}
+
+const validateOlevel = (results) => {
+    results = JSON.parse(results);
+
+    const subjects = [
+        
+    ]
+
+}
+
+export { validateSPM, validateSTPM };
