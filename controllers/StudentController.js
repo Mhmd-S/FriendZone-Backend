@@ -67,7 +67,7 @@ const login = (req, res, next)  => {
 
 const updateAcademic = [ // TODO: Add validation for other academics
     body('academicName')
-        .isIn(['SPM', 'STPM', 'O-Levels' ,'A-Levels', 'IB', 'Foundation', 'Diploma', 'Degree', 'Masters', 'PhD']).withMessage('Academic name is not valid')
+        .isIn(['SPM', 'STPM', 'UEC','O-Level', 'AS-Level' ,'A-Level', 'IB', 'Foundation', 'Diploma', 'Degree', 'Masters', 'PhD']).withMessage('Academic name is not valid')
         .escape(),
     body('results')
         .isJSON().withMessage('Results is not valid')
