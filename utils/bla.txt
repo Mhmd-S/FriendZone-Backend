@@ -45,3 +45,5 @@ Thinking Skills - 9694
 Travel & Tourism - 9395
 Urdu - Pakistan only  - 9686
 Urdu  - 9676
+
+{"Bahasa Melayu":"A","Bahasa Inggeris":"A","Matematik":"A","Sejarah":"A","Pendidikan Islam":"A","Pendidikan Moral":"A","Sains":"A","Geografi:"A","Kemahiran Hidup":"A","Pendidikan Seni":"A"}

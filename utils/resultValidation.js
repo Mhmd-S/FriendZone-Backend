@@ -1,11 +1,13 @@
-// Results is an JSON with the following structure:
+// Secondary Education Results is an JSON with the following structure:
 // {"Bahasa Melayu" : "A+", "Sejarah":"C"} 
 
-const validateSPM = (results) => {
+// University Education Results is an JSON with the following structure:
+// {"Institution Name" : "Oxfornd", "CGPA":"2.4", "Field of Study": "Computer Science", "Graduation Year": "2020"}
 
-    results = JSON.parse(results);
+const validateSPM = async(results) => {
+    results = await JSON.parse(results);
 
-    if (results.keys().length < 10 || results.keys().length > 12) throw new Error("SPM results must be between 10 to 12 subjects");
+    if (Object.keys(results).length < 10 || Object.keys(results).length > 12) throw new Error("SPM results must be between 10 to 12 subjects");
 
     const requiredSubjects = [
     "Bahasa Melayu", 
@@ -14,7 +16,8 @@ const validateSPM = (results) => {
     "Sejarah", 
     "Pendidikan Islam", 
     "Pendidikan Moral", 
-    "Sains", "Geografi", 
+    "Sains", 
+    "Geografi", 
     "Kemahiran Hidup", 
     "Pendidikan Seni"
     ];
@@ -49,23 +52,24 @@ const validateSPM = (results) => {
 
     // Check if there are any elective subjects
     const electiveSubjectsPresent = electiveSubjects.map(subject => results.hasOwnProperty(subject));
-    electiveSubjectsPresent && electiveSubjects.forEach(subject => {
+
+    electiveSubjectsPresent.includes(true) && electiveSubjects.forEach(subject => {
         if(!results.hasOwnProperty(subject)) {
             throw new Error('Invalid elective subject');
         }
     });
 
     // Check if all elective grades are valid
-    electiveSubjectsPresent && electiveSubjects.forEach(subject => {
+    electiveSubjectsPresent.includes(true) && electiveSubjects.forEach(subject => {
         if(!requiredGrades.includes(results[subject])) {
             throw new Error(`${results[subject]} is not a valid SPM grade`);
         }
     });
 }
 
-const validateSTPM = (results) => {
-    results = JSON.parse(results);
-    if (results.keys().length < 4 || results.keys().length > 5) throw new Error("STPM results must be between 3 to 5 subjects");
+const validateSTPM = async(results) => {
+    results = await JSON.parse(results);
+    if (Object.keys(results).length < 4 || Object.keys(results).length > 5) throw new Error("STPM results must be between 3 to 5 subjects");
 
     const subjects = ["Pengajian Am", "Bahasa Melayu", "Bahasa Cina", "Bahasa Tamil", "Bahasa Arab", "Literature in English", "Kesusasteraan Melayu Komunikatif", "Syariah", "Usuluddin", "Tahfiz Al-Quran", "Sejarah", "Geografi", "Ekonomi", "Pengajian Perniagaan", "Perakaunan", "Mathematics (Management)", "Mathematics (Technical)", "Information and Communications Technology", "Physics", "Chemistry", "Biology", "Sains Sukan", "Seni Visual"]
 
@@ -86,8 +90,8 @@ const validateSTPM = (results) => {
     });
 }
 
-const validateIGCSE = (results) => {
-    results = JSON.parse(results);
+const validateIGCSE = async(results) => {
+    results = await JSON.parse(results);
     if (Object.keys(results).length < 5 || Object.keys(results).length > 14) throw new Error("IGCSE results must be between 5 to 14 subjects");
 
     const subjects = ["Accounting - 0452", "Accounting (9-1) - 0985", "Afrikaans - Second Language - 0548", "Agriculture - 0600", "Arabic - First Language - 0508", "Arabic - First Language (9-1) - 7184", "Arabic - Foreign Language - 0544", "Art & Design - 0400", "Art & Design (9-1) 0989", "Bahasa Indonesia - 0538", "Biology - 0610", "Biology (9-1) - 0970", "Business Studies - 0450", "Business Studies (9-1) - 0986", "Chemistry - 0620", "Chemistry (9-1) - 0971", "Chinese - First Language - 0509", "Chinese - Second Language - 0523", "Chinese (Mandarin) - Foreign Language (0547)", "Computer Science - 0478", "Computer Science (9-1) - 0984", "Design & Technology - 0445", "Design & Technology (9-1) - 0979", "Drama - 0411", "Drama (9-1) - 0994", "Economics - 0455", "Economics (9-1) - 0987", "English - First Language - 0500", "English - First Language (9-1) - 0990", "English - First Language (US) - 0524", "English – Literature in English – 0475", "English – Literature in English (9-1) – 0992", "English (as an Additional Language) - 0472", "English (as an Additional Language) (9-1) - 0772", "English (Core) as a Second Language (Egypt) - 0465", "English as a Second Language (Count-in speaking) (0511)", "English as a Second Language (Count-in Speaking) (9-1) (0991)", "English as a Second Language (Speaking endorsement) - 0510", "English as a Second Language (Speaking Endorsement) (9-1) - 0993", "Enterprise - 0454", "Environmental Management - 0680", "Food & Nutrition - 0648", "French - First Language - 0501", "French - Foreign Language - 0520", "French (9-1) - 7156", "Geography - 0460", "Geography (9-1) - 0976", "German - First Language - 0505", "German - Foreign Language - 0525", "German (9-1) - 7159", "Global Perspectives - 0457", "Hindi as a Second Language - 0549", "History - 0470", "History (9-1) - 0977", "Information and Communication Technology - 0417", "Information and Communication Technology (9-1) - 0983", "IsiZulu as a Second Language - 0531", "Islamiyat - 0493", "Italian - Foreign Language - 0535", "Italian (9-1) - 7164", "Latin - 0480", "Malay - First Language - 0696", "Malay - Foreign Language - 0546", "Marine Science - 0697", "Mathematics - 0580", "Mathematics - Additional - 0606", "Mathematics - International - 0607", "Mathematics (9-1) - 0980", "Music - 0410", "Music (9-1) - 0978", "Pakistan Studies - 0448", "Physical Education - 0413", "Physical Education (9-1) - 0995", "Physical Science - 0652", "Physics - 0625", "Physics (9-1) - 0972", "Portuguese - First Language - 0504", "Religious Studies - 0490", "Sanskrit - 0499", "Science - Combined - 0653", "Sciences - Co-ordinated (9-1) - 0973", "Sciences - Co-ordinated (Double) - 0654", "Setswana - First Language - 0698", "Sociology - 0495", "Spanish - First Language - 0502", "Spanish - Foreign Language - 0530", "Spanish - Literature - 0488", "Spanish - Literature in Spanish - 0474", "Spanish (9-1) - 7160", "Swahili - 0262", "Thai - First Language - 0518", "Travel & Tourism - 0471", "Turkish - First Language - 0513", "Urdu as a Second Language - 0539", "Vietnamese - First Language - 0695", "World Literature - 0408"]
@@ -109,8 +113,8 @@ const validateIGCSE = (results) => {
     });
 }
 
-const validateAS_Level = (results) => {
-    results = JSON.parse(results);
+const validateAS_Level = async(results) => {
+    results = await JSON.parse(results);
 
     if (Object.keys(results).length < 1 || Object.keys(results).length > 6) throw new Error("AS Level results must be between 1 to 6 subjects");
 
@@ -133,8 +137,8 @@ const validateAS_Level = (results) => {
     });
 }
 
-const validateA_Level = (results) => {
-    results = JSON.parse(results);
+const validateA_Level = async(results) => {
+    results = await JSON.parse(results);
 
     if (Object.keys(results).length < 1 || Object.keys(results).length > 6) throw new Error("A Level results must be between 1 to 6 subjects");
 
@@ -157,8 +161,8 @@ const validateA_Level = (results) => {
     });
 }
 
-const validateUEC = (results) => {
-    results = JSON.parse(results);
+const validateUEC = async(results) => {
+    results = await JSON.parse(results);
 
     if (Objects.keys(results).length < 7 || Objects.keys(results).length > 10) throw new Error("UEC results must be between 7 to 10 subjects");
 
@@ -181,8 +185,8 @@ const validateUEC = (results) => {
     });
 }
 
-const validateIB = (results) => {
-    results = JSON.parse(results);
+const validateIB = async(results) => {
+    results = await JSON.parse(results);
 
     if (Objects.keys(results).length < 6 || Objects.keys(results).length > 7) throw new Error("IB results must be between 6 to 7 subjects");
 
@@ -215,11 +219,38 @@ const validateIB = (results) => {
     ];
 
     const gradesGroup = ["7", "6", "5", "4", "3", "2", "1"];
-    const gradesCore = ["3", "2", "1"];
 
-    
+    // Check if both core subjects are present
+    if (!results.hasOwnProperty("Core - Extended Essay") || !results.hasOwnProperty("Core - Theory of Knowledge")) throw new Error("IB results must have both core subjects");
 
+    // Check if the maximum grade for core subjects is 3
+    if (results["Core - Extended Essay"] > 3 || results["Core - Theory of Knowledge"] > 3) throw new Error("IB core subjects must have a maximum grade of 3");
+
+    // Check if all subjects are valid
+    Object.keys(results).forEach(subject => {
+        if(!subjectsGroup.includes(subject) && !subjectsCore.includes(subject)) {
+            throw new Error(`${subject} is not a valid IB subject`);
+        }
+    });
+
+    // Check if all grades are valid
+    Object.values(results).forEach(grade => {
+        if(!gradesGroup.includes(grade)) {
+            throw new Error(`${grade} is not a valid IB grade`);
+        }
+    });
 }
 
+const validateCertificate = async(results) => {
+    results = await JSON.parse(results);
 
-export { validateSPM, validateSTPM, validateIGCSE, validateAS_Level, validateA_Level, validateUEC };
+    const requiredInformation = ['institutionName', 'CGPA', 'gradutationYear']; 
+
+    if( !Object.keys(results).contains(requiredInformation) ) throw new Error("Certificate results must have institution name, CGPA and graduation year");
+
+    if( results['CGPA'] > 4.0 || results['CGPA'] < 0.0 ) throw new Error("CGPA must be between 0.0 to 4.0");
+    if ( results['insitutionName'].length < 1 || results['institutionName'].length > 100 ) throw new Error("Institution name must be between 1 to 100 characters");
+    if ( results['graduationYear'] < 1960 || results['graduationYear'] > 2023 ) throw new Error("Graduation year must be between 1900 to 2023");
+}
+
+export { validateSPM, validateSTPM, validateIGCSE, validateAS_Level, validateA_Level, validateUEC, validateIB, validateCertificate };

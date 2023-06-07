@@ -43,6 +43,27 @@ const addAcademicRecord = async(studentId, academicObj) => {
     }
 }
 
-export { createStudent, getStudent };
+const updateAcademicRecord = async(studentId, academicId, academicObj) => {
+    const academicRecord  = new Academic({...academicObj});
+    const result = await Student.findByIdAndUpdate({ _id: studentId, "academicRecord._id": academicId},
+                                                    { $set: { "academicRecord.$": academicRecord } }).exec();   
+    if (result === null) {
+        throw new AppError(404, "User not found");
+    }else {
+        return result;
+        }
+}
+
+const updatePersonalStatement = async(studentId, personalStatement) => {
+    const result = await Student.findByIdAndUpdate({ _id: studentId},
+                                                    { personalStatement: personalStatement }).exec();
+    if (result === null) {
+        throw new AppError(404, "User not found");
+    }else {
+         return result;
+    }
+}
+
+export { createStudent, getStudent, addAcademicRecord, updateAcademicRecord, updatePersonalStatement };
 
 // Test StudentService.js *****

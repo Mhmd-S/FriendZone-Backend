@@ -34,7 +34,16 @@ const StudentSchema = new Schema({
     persoalStatement: {
         type: String,
         default: "",
-    },  
+    },
+    preferredSubjects: {
+        type: [Schema.Types.ObjectId],
+        ref: "Subject",
+    },
+    preferredInstitutions: {
+        type: [Schema.Types.ObjectId],
+        ref: "Institution",
+    }  
+
 }, { timestamps: true })
 
 const Student = mongoose.model("Student", StudentSchema);
