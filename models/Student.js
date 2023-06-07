@@ -42,8 +42,11 @@ const StudentSchema = new Schema({
     preferredInstitutions: {
         type: [Schema.Types.ObjectId],
         ref: "Institution",
+    },
+    verified: {
+        type: Boolean,
+        default: false,
     }  
-
 }, { timestamps: true })
 
 const Student = mongoose.model("Student", StudentSchema);
