@@ -23,30 +23,22 @@ const StudentSchema = new Schema({
         type: Number,
         required: true,
     },
+    gender:{
+        type: String,
+        enum: ["male", "female"]
+    },
     dob: {
         type: String,
         required: true,
     },
-    academics: {
-        type: [Schema.Types.ObjectId],
-        ref: "Academic",
-    },
-    persoalStatement: {
-        type: String,
-        default: "",
-    },
-    preferredSubjects: {
-        type: [Schema.Types.ObjectId],
-        ref: "Subject",
-    },
-    preferredInstitutions: {
-        type: [Schema.Types.ObjectId],
-        ref: "Institution",
-    },
     verified: {
         type: Boolean,
         default: false,
-    }  
+    },
+    profilePicture: {
+        type: String,
+        requored: true
+    }, 
 }, { timestamps: true })
 
 const Student = mongoose.model("Student", StudentSchema);

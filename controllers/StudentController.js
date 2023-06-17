@@ -119,7 +119,17 @@ const updatePersonalStatement = [
     } catch (err) {
         next(err);
     }
-}
-]
+}]
+
+// Students prefrences (course, university, budget, academicLevel)
+// const addPrefrences = [
+//     body('academicLevel')
+//     . 
+//     ,
+
+//     (req, res, next) => {
+
+// }
+// ]
 
 export { createStudent, login, updateAcademic, updatePersonalStatement };

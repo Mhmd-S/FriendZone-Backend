@@ -10,5 +10,8 @@ router.post("/register", StudentController.createStudent);
 router.post("/login", StudentController.login);
 router.put("/updateAcademic", StudentController.updateAcademic);
 
+// Students prefrences (course, university)
+
 export default router;
+
 

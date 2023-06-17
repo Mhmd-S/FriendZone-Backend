@@ -64,6 +64,8 @@ const updatePersonalStatement = async(studentId, personalStatement) => {
     }
 }
 
+// 
+
 export { createStudent, getStudent, addAcademicRecord, updateAcademicRecord, updatePersonalStatement };
 
 // Test StudentService.js *****
