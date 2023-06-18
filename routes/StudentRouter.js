@@ -11,6 +11,9 @@ router.post("/login", StudentController.login);
 
 router.put("/profile-picture", StudentController.updateProfilePicture);
 
+router.put("/freindRequest", StudentController.requestFriend);
+router.put("/friendAccept", StudentController.acceptFriend);
+
 export default router;
 
 

@@ -31,9 +31,21 @@ const StudentSchema = new Schema({
         type: String,
         required: true,
     },
+    friends: {
+        type: [Schema.Types.ObjectId],
+        default: []
+    },
+    pendingFriends: {
+        type: [Schema.Types.ObjectId],
+        default: []
+    },
     verified: {
         type: Boolean,
         default: false,
+    },
+    post: {
+        type: [Schema.Types.ObjectId],
+        default:[]
     },
     profilePicture: {
         type: String,

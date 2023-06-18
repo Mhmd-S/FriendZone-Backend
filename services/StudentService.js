@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import Student from '../models/Student';
 import uploadImage from '../utils/uploadManager';
+import mongoose from 'mongoose';
 import { AppError } from '../utils/errorHandler';
 
 const getStudent = async(studentId) => {
@@ -18,7 +19,7 @@ const createStudent = async(studentObj) => {
         }
 
         studentObj.password = hash;
-
+  
         const student = new Student({ ...studentObj });
 
         student.save()
@@ -42,9 +43,27 @@ const updateProfilePicture = async(id,imageData) => {
         })
 };
 
+const requestFriend = async(userId, friendId) => {
+    try{
+        const result = await Student.findByIdAndUpdate(friendId, { $push: { pendingFriends: new mongoose.Types.ObjectId(userId) }}).exec();
+        return result;
+    } catch(err) {
+        throw new AppError(500, "Couldn't send friend request");
+    }
+}   
+
+const acceptFriend = async(userId, friendId) => {
+    try {
+        const removeFromPending = await Student.findByIdAndUpdate(userId, {$pull: { pendingFriends: new mongoose.Types.ObjectId(friendId) }}).exec(); // Check if it modified anything... if not send an error to user.
+        const addToFriendList = await Student.findByIdAndUpdate(userId, {$push: { friends: new mongoose.Types.ObjectId(friendId) }}).exec();
+        return addToFriendList;
+    } catch(err) {
+        throw new AppError(500, "Couldn't accept friend request")
+    }
+}
 
 // 
 
-export { createStudent, getStudent, updateProfilePicture };
+export { createStudent, getStudent, updateProfilePicture, requestFriend, acceptFriend };
 
 // Test StudentService.js *****

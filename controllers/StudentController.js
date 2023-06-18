@@ -74,6 +74,10 @@ const updateProfilePicture = [
         return true; // Validation passed
       }),
       (req,res,next) => {
+        const errors = validationResult(req);
+
+        if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
+
         studentService.updateProfilePicture( req.user._id ,req.files.imageField)
             .then(result => {
                 res.json({ status: "OK", result: "Profile picture updated" });
@@ -83,6 +87,32 @@ const updateProfilePicture = [
             });
       }
 ]
+
+const requestFriend = async(req,res,next) => {
+    // req.query.userId is the id of the user to send friend request to
+
+    if (!req.query.userId || req.user._id == req.query.userId) {
+        next(new AppError("400", "Invalid ?userId query value"));
+    }
+
+    studentService.requestFriend(req.user._id, req.query.userId)
+        .then(result => {
+            res.json({ status: "OK", result: "Friend request sent"});
+        }).catch(err => {
+            next(err);
+        })
+}
+
+
+const acceptFriend = async (req,res,next) => {
+    studentService.acceptFriend(req.query.userId, req.user._id)
+        .then(result => {
+            res.json({ status: "OK", result: "Friend request accepted"});
+        })
+        .catch(err => {
+            next(err);
+        })
+}
 
 const login = (req, res, next)  => {
     passport.authenticate('student-local', (err,user,info) => {
@@ -97,4 +127,4 @@ const login = (req, res, next)  => {
     })(req,res,next);
 }
 
-export { createStudent, updateProfilePicture, login };
+export { createStudent, updateProfilePicture, login, requestFriend, acceptFriend };
