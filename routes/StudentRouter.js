@@ -8,9 +8,8 @@ const router = express.Router();
 
 router.post("/register", StudentController.createStudent);
 router.post("/login", StudentController.login);
-router.put("/updateAcademic", StudentController.updateAcademic);
 
-// Students prefrences (course, university)
+router.put("/profile-picture", StudentController.updateProfilePicture);
 
 export default router;
 

@@ -4,7 +4,6 @@ import { AppError } from '../utils/errorHandler';
 import Student from '../models/Student';
 import passport from 'passport';
 import '../authentication/passport-config';
-import { validateSPM, validateSTPM, validateIGCSE, validateAS_Level, validateA_Level, validateUEC, validateIB, validateCertificate } from '../utils/resultValidation';
 
 const createStudent = [
     body('email')
@@ -21,8 +20,9 @@ const createStudent = [
         .isStrongPassword().withMessage("Password min length is 8. Needs to contain atleast 1 lowercase, uppercase, symbol and number")
         .custom((value, { req } ) => { // Checks if the two passwords are the same
             if (value !== req.body.confirmPassword){
-                throw new Error("Passwords are not the same");
+                throw new Error("Password and Confirm Password are not the same");
             }
+            return true;
         })
         .escape(),
     body('firstName')
@@ -51,85 +51,50 @@ const createStudent = [
     }
 ];
 
+const updateProfilePicture = [
+    // Validate the request
+    body('imageField').custom((value, { req }) => {
+        if (!req.file || !req.file.imageField) {
+          throw new Error('Image file is required.');
+        }
+        console.log(req.files)
+        const imageFile = req.files.imageField;
+    
+        // Check file size (max 1MB)
+        if (imageFile.size > 1024 * 1024) {
+          throw new Error('Image file size should be less than 1MB.');
+        }
+    
+        // Check file type
+        const allowedMimeTypes = ['image/jpeg', 'image/png'];
+        if (!allowedMimeTypes.includes(imageFile.mimetype)) {
+          throw new Error('Only JPEG, and PNG are allowed.');
+        }
+    
+        return true; // Validation passed
+      }),
+      (req,res,next) => {
+        studentService.updateProfilePicture( req.user._id ,req.files.imageField)
+            .then(result => {
+                res.json({ status: "OK", result: "Profile picture updated" });
+            })
+            .catch(err => {
+                next(err);
+            });
+      }
+]
+
 const login = (req, res, next)  => {
     passport.authenticate('student-local', (err,user,info) => {
-        if (err) return next(new AppError(500, err));
-        if (!user) return next(new AppError(400, info.message));
+        if (err) { return next(new AppError(500, err)) };
+
+        if (!user) { return next(new AppError(400, info.message)) };
+
         req.login(user, (err) => {
-            if(err) return(new AppError(500, err));
-            res.json({ status: "OK", result: user }) 
-            return;
+            if(err) { return next(new AppError(500, err)) };
+            return res.json({ status: "OK", result: user });
         })
     })(req,res,next);
 }
 
-const updateAcademic = [
-    body('academicName')
-        .isIn(['SPM', 'STPM', 'UEC', 'AS-Level' ,'A-Level', 'IB', 'Foundation', 'Diploma', 'Degree', 'Masters', 'PhD']).withMessage('Academic certificate name is not valid'),
-    body('results')
-        .isJSON().withMessage('Results is not valid')
-        .if(body('academicName').equals('SPM'))
-        .custom(value => validateSPM(value))
-
-        .if(body('academicName').equals('STPM'))
-        .custom(value => validateSTPM(value))
-
-        .if(body('academicName').equals('UEC'))
-        .custom(value => validateUEC(value))
-
-        .if(body('academicName').equals('IGCSE'))
-        .custom(value => validateIGCSE(value))
-
-        .if(body('academicName').equals('AS-Level'))
-        .custom(value => validateAS_Level(value))
-
-        .if(body('academicName').equals('A-Level'))
-        .custom(value => validateA_Level(value))
-
-        .if(body('academicName').equals('IB'))
-        .custom(value  => validateIB(value))
-
-        .if(body('academicName').isIn(['Foundation', 'Diploma', 'Degree', 'Masters', 'PhD']))
-        .custom(value => validateCertificate(value)),
-    async(req, res, next) => {
-        try{
-            const errors = validationResult(req);
-
-            if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
-
-            // const { academicName, results } = req.body;
-            // const user = await studentService.addAcademicRecord(req.user._id, { academicName, results });
-            res.json({ status: "OK", result: "user" });
-        } catch(err) {
-            next(err);
-        }
-    }
-]
-
-const updatePersonalStatement = [
-    body('personalStatement')
-    .isAlphanumeric().withMessage('Personal statement must be alphanumeric')
-    .isLength({ min: 1500, max: 4000 }).withMessage('Personal statement must be between 2000 and 4000 characters (~300-600 words)')
-    .escape(),
-    (req,res,next) => {
-    try{
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
-
-    } catch (err) {
-        next(err);
-    }
-}]
-
-// Students prefrences (course, university, budget, academicLevel)
-// const addPrefrences = [
-//     body('academicLevel')
-//     . 
-//     ,
-
-//     (req, res, next) => {
-
-// }
-// ]
-
-export { createStudent, login, updateAcademic, updatePersonalStatement };
+export { createStudent, updateProfilePicture, login };

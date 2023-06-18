@@ -1,6 +1,6 @@
 import bcrypt from 'bcryptjs';
 import Student from '../models/Student';
-import Academic from '../models/Academic';
+import uploadImage from '../utils/uploadManager';
 import { AppError } from '../utils/errorHandler';
 
 const getStudent = async(studentId) => {
@@ -32,40 +32,19 @@ const createStudent = async(studentObj) => {
     } );
 }
 
-const addAcademicRecord = async(studentId, academicObj) => {
-    const academicRecord  = new Academic({...academicObj});
-    const result = await Student.findByIdAndUpdate({ _id: studentId},
-                                                    { $push: { academicRecord } }).exec();
-    if (result === null) {
-        throw new AppError(404, "User not found");
-    }else {
-         return result;
-    }
-}
+const updateProfilePicture = async(id,imageData) => {
+    uploadImage(id,imageData)
+        .then((fileUrl)=>{
+            Student.findByIdAndUpdate(id, { profilePicture: fileUrl })
+        })
+        .catch((err) => {
+            throw new AppError(500, "Couldn't save image")
+        })
+};
 
-const updateAcademicRecord = async(studentId, academicId, academicObj) => {
-    const academicRecord  = new Academic({...academicObj});
-    const result = await Student.findByIdAndUpdate({ _id: studentId, "academicRecord._id": academicId},
-                                                    { $set: { "academicRecord.$": academicRecord } }).exec();   
-    if (result === null) {
-        throw new AppError(404, "User not found");
-    }else {
-        return result;
-        }
-}
-
-const updatePersonalStatement = async(studentId, personalStatement) => {
-    const result = await Student.findByIdAndUpdate({ _id: studentId},
-                                                    { personalStatement: personalStatement }).exec();
-    if (result === null) {
-        throw new AppError(404, "User not found");
-    }else {
-         return result;
-    }
-}
 
 // 
 
-export { createStudent, getStudent, addAcademicRecord, updateAcademicRecord, updatePersonalStatement };
+export { createStudent, getStudent, updateProfilePicture };
 
 // Test StudentService.js *****

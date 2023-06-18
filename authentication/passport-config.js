@@ -4,7 +4,7 @@ import passport from 'passport';
 
 import Student from '../models/Student';
 import Admin from '../models/Admin';
-import Agent from '../models/Agent';
+
 
 const configurePassport = () => {
   // Configure local strategy for Student
@@ -38,7 +38,7 @@ const configurePassport = () => {
 
   // Configure local strategy for Admin
   passport.use('admin-local', new LocalStrategy({
-      usernameField: 'username',
+      usernameField: 'email',
       passwordField: 'password'
   }, async (username, password, done) => {
       try {
@@ -65,37 +65,9 @@ const configurePassport = () => {
       }
   }));
 
-  // Configure local strategy for Agent
-  passport.use('agent-local', new LocalStrategy({
-      usernameField: 'username',
-      passwordField: 'password'
-  }, async (username, password, done) => {
-      try {
-          const agent = await Agent.findOne({ username });
-          
-          if (!agent) {
-              return done(null, false, { message: 'Invalid email or password' });
-          }
-
-          return bcrypt.compare(password, user.password)
-            .then((res) => {
-              if (res) {
-                // passwords match! log user in
-                return done(null, user)
-              } else {
-                // passwords do not match!
-                return done(null, false, { message: "Incorrect password" })
-              }
-            }).catch((error) => {
-              return done(error);
-            })
-      } catch (error) {
-          return done(error);
-      }
-  }));
-
   passport.serializeUser((user, done) => {
-    done(null, user.id);
+    console.log(user)
+    done(null, user._id);
   });
 
   passport.deserializeUser(async (id, done) => {
@@ -108,11 +80,6 @@ const configurePassport = () => {
         const admin = await Admin.findById(id);
         if (admin) {
             return done(null, admin);
-        }
-
-        const agent = await Agent.findById(id);
-        if (agent) {
-            return done(null, agent);
         }
 
         return done(new Error('User not found'));

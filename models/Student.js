@@ -37,9 +37,8 @@ const StudentSchema = new Schema({
     },
     profilePicture: {
         type: String,
-        requored: true
     }, 
 }, { timestamps: true })
 
 const Student = mongoose.model("Student", StudentSchema);
-export default Student; 
+export default Student;
