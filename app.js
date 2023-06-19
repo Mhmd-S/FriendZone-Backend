@@ -45,7 +45,7 @@ app.use('/student', StudentRouter);
 
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {
-    next(new AppError(400, 'Not Found'));
+    next(new AppError(404, 'Not Found'));
 });
 
 app.use((err,req,res,next) => {

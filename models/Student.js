@@ -33,10 +33,17 @@ const StudentSchema = new Schema({
     },
     friends: {
         type: [Schema.Types.ObjectId],
+        ref: "Student",
+        default: []
+    },
+    pendingRequests: {
+        type: [Schema.Types.ObjectId],
+        ref: "Student",
         default: []
     },
     pendingFriends: {
         type: [Schema.Types.ObjectId],
+        ref: "Student",
         default: []
     },
     verified: {
@@ -45,6 +52,7 @@ const StudentSchema = new Schema({
     },
     post: {
         type: [Schema.Types.ObjectId],
+        ref: "Post",
         default:[]
     },
     profilePicture: {

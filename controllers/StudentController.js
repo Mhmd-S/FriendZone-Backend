@@ -1,9 +1,28 @@
-import * as studentService from '../services/StudentService';
+import * as StudentService from '../services/StudentService';
 import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import Student from '../models/Student';
 import passport from 'passport';
 import '../authentication/passport-config';
+
+const getStudent = async(req,res,next) => {
+    try{
+        const userId = req.query.studentId;
+        const studentInfo = await StudentService.getStudent(userId);
+        res.json({ status:"OK", result: studentInfo });
+    } catch(err) {
+        next(err);
+    }
+};
+
+const deleteStudent = async(req,res,next) => {
+    try{
+        const result = await StudentService.deleteStudent(req.params.studentId);
+        res.json({ status:"OK", result: "Student deleted successfully"})
+    } catch(err) {
+        next(err);
+    }
+}
 
 const createStudent = [
     body('email')
@@ -43,7 +62,7 @@ const createStudent = [
             if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
 
             const { email, password, firstName, lastName, dob, phoneNumber } = req.body;
-            const user = await studentService.createStudent({ email, password, firstName, lastName, dob, phoneNumber });
+            const user = await StudentService.createStudent({ email, password, firstName, lastName, dob, phoneNumber });
             res.json({ status: "OK", result: user });
         } catch(err) {
             next(err);
@@ -78,7 +97,7 @@ const updateProfilePicture = [
 
         if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
 
-        studentService.updateProfilePicture( req.user._id ,req.files.imageField)
+        StudentService.updateProfilePicture( req.user._id ,req.files.imageField)
             .then(result => {
                 res.json({ status: "OK", result: "Profile picture updated" });
             })
@@ -89,13 +108,13 @@ const updateProfilePicture = [
 ]
 
 const requestFriend = async(req,res,next) => {
-    // req.query.userId is the id of the user to send friend request to
 
-    if (!req.query.userId || req.user._id == req.query.userId) {
-        next(new AppError("400", "Invalid ?userId query value"));
+    // req.query.userId is the id of the user to send friend request to
+    if (!req.query.studentId || req.user._id == req.query.studentId) {
+        next(new AppError(400, "Invalid ?userId query value"));
     }
 
-    studentService.requestFriend(req.user._id, req.query.userId)
+    StudentService.requestFriend(req.user._id, req.query.studentId)
         .then(result => {
             res.json({ status: "OK", result: "Friend request sent"});
         }).catch(err => {
@@ -103,9 +122,8 @@ const requestFriend = async(req,res,next) => {
         })
 }
 
-
 const acceptFriend = async (req,res,next) => {
-    studentService.acceptFriend(req.query.userId, req.user._id)
+    StudentService.acceptFriend(req.query.studentId, req.user._id)
         .then(result => {
             res.json({ status: "OK", result: "Friend request accepted"});
         })
@@ -127,4 +145,4 @@ const login = (req, res, next)  => {
     })(req,res,next);
 }
 
-export { createStudent, updateProfilePicture, login, requestFriend, acceptFriend };
+export { getStudent, createStudent, deleteStudent, updateProfilePicture, login, requestFriend, acceptFriend };
