@@ -20,10 +20,6 @@ const createPost = async(postObj) => {
         })
 }
 
-const likePost = async(userId, postId) => {
-    const result = await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }).exec();
-}
-
 const updatePost = async(postId,newPostObj) => {
     const post = await Post.findById(postId).populate('comments').exec();
     if (post === null) throw new AppError(400, 'Invalid :postId parameter');
@@ -46,6 +42,21 @@ const deletePost = async(postId) => {
     const result = await Post.findByIdAndRemove(postId);
     return result;
 }
+
+const likePost = async(userId, postId) => {
+    const result = await Post.findByIdAndUpdate(postId, { $push: { likes: userId } });
+    return result;
+}
+
+const unLikePost = async(userId, postId) => {
+    const result = await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } });
+    return result;
+}
+
+const addCommentToPost = async(postId, commentObj) => {
+    const result = await Post.findByIdAndUpdate(postId, { $push: { commentObj } });
+    return result;
+}
     
 
-export { getPost, getPosts, createPost, updatePost, deletePost };
+export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost };
