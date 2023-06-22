@@ -21,13 +21,13 @@ router.put('/unLike/:postId', PostController.unLikePost);
 // Add a comment to post
 router.put('/comment/:postId', PostController.addCommentToPost);
 
-// Delete a comment to post
-router.put('/comment/:postId', PostController.deleteCommentFromPost);
-
 // Update a post
 router.put('/:postId', PostController.updatePost);
 
 // Delete a post
 router.delete('/:postId', PostController.deletePost );
+
+// Delete a comment to post
+router.delete('/comment/:postId/:commentId', PostController.deleteCommentFromPost);
             
 export default router;

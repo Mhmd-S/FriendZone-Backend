@@ -1,4 +1,5 @@
-import Post from '../models/PostModel'
+import {Post, Comment} from '../models/Post';
+
 import { AppError } from '../utils/errorHandler';
 
 const getPost = async(postId) => {
@@ -57,6 +58,11 @@ const addCommentToPost = async(postId, commentObj) => {
     const result = await Post.findByIdAndUpdate(postId, { $push: { commentObj } });
     return result;
 }
+
+const deleteCommentFromPost = async(postId, commentId) => {
+    const result = await Post.findByIdAndUpdate(postId, { $pull: { commentId }});
+    return result;
+}
     
 
-export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost };
+export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost, addCommentToPost, deleteCommentFromPost };

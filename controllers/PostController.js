@@ -2,8 +2,7 @@ import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
 
-import Post from '../models/Post';
-import Comment from '../models/Post'
+import {Post, Comment} from '../models/Post'
 
 const getPost = async(req,res,next) => {
     try {
@@ -33,7 +32,7 @@ const createPost = [
 
             const postInfo = {
                 content: req.body.content,
-                author: req.userId, // Recieved when verifying the cookies
+                author: req.user._id, // Recieved when verifying the cookies
             }
 
             const post = await PostService.createPost(postInfo);
@@ -108,7 +107,7 @@ const unLikePost = async(req,res,next) => {
 
         if (!userId || !postId) throw new AppError(400, "Invalid :postId paramter or No user ID found")
 
-        const result = PostService.likePost(userId, postId);
+        const result = PostService.unLikePost(userId, postId);
         res.json({ status: "OK", result: "Post unliked successfully" })
     } catch(err) {
         next(err);
@@ -121,9 +120,45 @@ const addCommentToPost = [
     .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
     .escape(),
     async(req,res,next) => {
-        
+        try{
+            const postId = req.params.postId;
+            const content = req.params.conent;
+
+            const post = await Post.findById(postId);
+            
+            if (!post) throw new AppError(400, "Invalid :postId parameter");
+
+            const commentObj = new Comment({ // Something wrong here
+                author: req.user._id,
+                content: content,    
+            });
+
+            const result = PostService.addCommentToPost(postId, commentObj)
+
+            res.json({ status: "OK", result: "Comment added successfully", comment: result})
+        } catch(err) {
+            next(err);
+        }        
     }
 ]
 
+const deleteCommentFromPost = async(req,res,next) => {
+    try {
+    const postId = req.params.postId;
+    const commentId = req.params.commentId;
 
-export { getPost, createPost, updatePost, deletePost, likePost, unLikePost };
+    if (!postId || !commentId) {
+        throw new AppError(400, "invalid :postId paramter or :commentId")
+    }
+
+    const result = PostService.deleteCommentFromPost(postId, commentId);
+
+    } catch (err) {
+        next(err);
+    }
+    
+
+}
+
+
+export { getPost, createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };

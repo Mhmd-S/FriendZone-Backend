@@ -8,6 +8,7 @@ import { AppError, errorHandlers } from './utils/errorHandler';
 
 // Import routers
 import StudentRouter from './routes/StudentRouter';
+import PostRouter from './routes/PostRouter';
 
 const app = express();
 
@@ -41,6 +42,7 @@ app.use(passport.session());
 
 // Routers
 app.use('/student', StudentRouter);
+app.use('/post', PostRouter);
 
 
 // Catching 404 and forwarding it to error handler
