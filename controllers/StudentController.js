@@ -26,6 +26,7 @@ const deleteStudent = async(req,res,next) => {
 
 const createStudent = [
     body('email')
+        .exists().withMessage('Email field is required')
         .isEmail().withMessage('Email is not valid')
         .custom(async(value, { req } ) => { 
                 // Checks if the email is already registered
@@ -36,6 +37,7 @@ const createStudent = [
         })
         .escape(),
     body('password')
+        .exists().withMessage('Password field is required')
         .isStrongPassword().withMessage("Password min length is 8. Needs to contain atleast 1 lowercase, uppercase, symbol and number")
         .custom((value, { req } ) => { // Checks if the two passwords are the same
             if (value !== req.body.confirmPassword){
@@ -45,15 +47,19 @@ const createStudent = [
         })
         .escape(),
     body('firstName')
+        .exists().withMessage('firstName field is required')
         .isLength({ min: 1 }).withMessage('First name is required')
         .escape(),
     body('lastName')
+        .exists().withMessage('lastName is required')
         .isLength({ min: 1 }).withMessage('Last name is required')
         .escape(),
     body('dob')
+        .exists().withMessage('dob is required')
         .isDate().withMessage('Date of birth is required')
         .escape(),
     body('phoneNumber')
+        .exists().withMessage('phoneNumber is required')
         .isMobilePhone('ms-MY').withMessage('Malaysian phone number is required')
         .escape(),
     async(req,res,next) => {
@@ -72,31 +78,30 @@ const createStudent = [
 
 const updateProfilePicture = [
     // Validate the request
-    body('imageField').custom((value, { req }) => {
-        if (!req.file || !req.file.imageField) {
-          throw new Error('Image file is required.');
-        }
-        console.log(req.files)
-        const imageFile = req.files.imageField;
-    
-        // Check file size (max 1MB)
-        if (imageFile.size > 1024 * 1024) {
-          throw new Error('Image file size should be less than 1MB.');
-        }
-    
-        // Check file type
-        const allowedMimeTypes = ['image/jpeg', 'image/png'];
-        if (!allowedMimeTypes.includes(imageFile.mimetype)) {
-          throw new Error('Only JPEG, and PNG are allowed.');
-        }
-    
-        return true; // Validation passed
-      }),
-      (req,res,next) => {
+    body('imageField')
+        .custom((value, { req }) => {
+            if (!req.file || !req.file.imageField) {
+              throw new Error('Image file is required.');
+            }
+            console.log(req.files)
+            const imageFile = req.files.imageField;
+        
+            // Check file size (max 1MB)
+            if (imageFile.size > 1024 * 1024) {
+              throw new Error('Image file size should be less than 1MB.');
+            }
+        
+            // Check file type
+            const allowedMimeTypes = ['image/jpeg', 'image/png'];
+            if (!allowedMimeTypes.includes(imageFile.mimetype)) {
+              throw new Error('Only JPEG, and PNG are allowed.');
+            }
+        
+            return true; // Validation passed
+        }),
+    (req,res,next) => {
         const errors = validationResult(req);
-
         if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
-
         StudentService.updateProfilePicture( req.user._id ,req.files.imageField)
             .then(result => {
                 res.json({ status: "OK", result: "Profile picture updated" });
@@ -104,11 +109,10 @@ const updateProfilePicture = [
             .catch(err => {
                 next(err);
             });
-      }
+    }
 ]
 
 const requestFriend = async(req,res,next) => {
-
     // req.query.userId is the id of the user to send friend request to
     if (!req.query.studentId || req.user._id == req.query.studentId) {
         next(new AppError(400, "Invalid ?userId query value"));
