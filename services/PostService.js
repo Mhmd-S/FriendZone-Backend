@@ -1,4 +1,6 @@
-import {Post, Comment} from '../models/Post';
+import mongoose from 'mongoose';
+import Post from '../models/Post';
+import Comment from '../models/Comment';
 
 import { AppError } from '../utils/errorHandler';
 
@@ -55,7 +57,9 @@ const unLikePost = async(userId, postId) => {
 }
 
 const addCommentToPost = async(postId, commentObj) => {
-    const result = await Post.findByIdAndUpdate(postId, { $push: { commentObj } });
+    const comment = new Comment({...commentObj});
+    const commentResult = comment.save();
+    const result = await Post.findByIdAndUpdate(postId, { $push: { comments: new mongoose.Types.ObjectId(commentResult._id) } });
     return result;
 }
 
@@ -65,4 +69,4 @@ const deleteCommentFromPost = async(postId, commentId) => {
 }
     
 
-export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost, addCommentToPost, deleteCommentFromPost };
+export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost, addCommentToPost, deleteCommentFromPost};

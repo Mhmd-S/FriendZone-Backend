@@ -2,7 +2,8 @@ import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
 
-import {Post, Comment} from '../models/Post'
+import Post from '../models/Post'
+import Comment from '../models/Comment'
 
 const getPost = async(req,res,next) => {
     try {
@@ -20,6 +21,7 @@ const getPost = async(req,res,next) => {
 
 const createPost = [
     body('content')
+    .exists().withMessage('Content field is required')
     .trim()
     .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
     .escape(),
@@ -46,6 +48,7 @@ const createPost = [
 
 const updatePost = [
     body('content')
+    .exists().withMessage('Content field is required')
     .trim()
     .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
     .escape(),
@@ -116,26 +119,27 @@ const unLikePost = async(req,res,next) => {
 
 const addCommentToPost = [
     body('content')
+    .exists().withMessage('Content field is required')
     .trim()
     .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
     .escape(),
     async(req,res,next) => {
         try{
             const postId = req.params.postId;
-            const content = req.params.conent;
 
             const post = await Post.findById(postId);
             
             if (!post) throw new AppError(400, "Invalid :postId parameter");
 
-            const commentObj = new Comment({ // Something wrong here
+            const commentObj = { // Something wrong here
                 author: req.user._id,
-                content: content,    
-            });
+                content: req.body.content,    
+            };
 
-            const result = PostService.addCommentToPost(postId, commentObj)
+            const result = await PostService.addCommentToPost(postId, commentObj)
 
-            res.json({ status: "OK", result: "Comment added successfully", comment: result})
+            res.json({ status: "OK", result: "Comment added successfully", comment: result.content});
+            
         } catch(err) {
             next(err);
         }        
@@ -156,9 +160,6 @@ const deleteCommentFromPost = async(req,res,next) => {
     } catch (err) {
         next(err);
     }
-    
-
 }
-
 
 export { getPost, createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };
