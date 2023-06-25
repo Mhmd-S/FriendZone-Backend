@@ -137,6 +137,11 @@ const acceptFriend = async (req,res,next) => {
 }
 
 const login = (req, res, next)  => {
+
+    if (req.isAuthenticated()) {
+        return next(new AppError(400, 'auth/user-already-logged-in'));
+    }
+
     passport.authenticate('student-local', (err,user,info) => {
         if (err) { return next(new AppError(500, err)) };
 

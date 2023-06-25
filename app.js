@@ -42,7 +42,10 @@ app.use(session({ secret: process.env.session_secret,
                 saveUninitialized:true, 
                 store: MongoStore.create({
                     client: mongoose.connection.getClient()
-                }),    
+                }),
+                cookie: {
+                    maxAge: 1000 * 30
+                }    
             }));
 app.use(passport.initialize());
 app.use(passport.session());
