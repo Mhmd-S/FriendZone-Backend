@@ -2,27 +2,27 @@ import { Strategy as LocalStrategy } from 'passport-local';
 import bcrypt from 'bcryptjs';
 import passport from 'passport';
 
-import Student from '../models/Student';
+import User from '../models/User';
 import Admin from '../models/Admin';
 
 
 const configurePassport = () => {
-  // Configure local strategy for Student
-  passport.use('student-local', new LocalStrategy({
+  // Configure local strategy for User
+  passport.use('user-local', new LocalStrategy({
       usernameField: 'email',
       passwordField: 'password'
   }, async (username, password, done) => {
       try {
-          const student = await Student.findOne({ email: username }).exec();
+          const user = await User.findOne({ email: username }).exec();
           
-          if (!student) {
+          if (!user) {
               return done(null, false, { message: 'Invalid email or password' });
           }
 
-          return bcrypt.compare(password, student.password)
+          return bcrypt.compare(password, User.password)
             .then((res) => {
               if (res) {
-                const { _id, email, firstName, lastName } = student;
+                const { _id, email, firstName, lastName } = user;
                 return done(null, { _id, email, firstName, lastName });
               } else {
                 return done(null, false, { message: "Incorrect password" });
@@ -52,7 +52,7 @@ const configurePassport = () => {
             .then((res) => {
               if (res) {
                 // passwords match! log user in
-                return done(null, user) // Change the user to display only a certain fields, like the student
+                return done(null, user) // Change the user to display only a certain fields, like the User
               } else {
                 // passwords do not match!
                 return done(null, false, { message: "Incorrect password" })
@@ -72,9 +72,9 @@ const configurePassport = () => {
 
   passport.deserializeUser(async (id, done) => {
     try {
-        const student = await Student.findById(id);
-        if (student) {
-            return done(null, student);
+        const User = await User.findById(id);
+        if (User) {
+            return done(null, User);
         }
 
         const admin = await Admin.findById(id);

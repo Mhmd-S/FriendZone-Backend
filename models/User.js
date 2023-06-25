@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 const Schema = mongoose.Schema;
 
-const StudentSchema = new Schema({
+const UserSchema = new Schema({
     email:{
         type: String,
         required: true,
@@ -33,17 +33,17 @@ const StudentSchema = new Schema({
     },
     friends: {
         type: [Schema.Types.ObjectId],
-        ref: "Student",
+        ref: "User",
         default: []
     },
     pendingRequests: {
         type: [Schema.Types.ObjectId],
-        ref: "Student",
+        ref: "User",
         default: []
     },
     pendingFriends: {
         type: [Schema.Types.ObjectId],
-        ref: "Student",
+        ref: "User",
         default: []
     },
     verified: {
@@ -60,5 +60,5 @@ const StudentSchema = new Schema({
     }, 
 }, { timestamps: true })
 
-const Student = mongoose.model("Student", StudentSchema);
-export default Student;
+const User = mongoose.model("User", UserSchema);
+export default User;

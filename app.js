@@ -8,7 +8,7 @@ import { AppError, errorHandlers } from './utils/errorHandler';
 import  MongoStore from 'connect-mongo';
 
 // Import routers
-import StudentRouter from './routes/StudentRouter';
+import UserRouter from './routes/UserRouter';
 import PostRouter from './routes/PostRouter';   
 
 const app = express();
@@ -51,7 +51,7 @@ app.use(passport.initialize());
 app.use(passport.session());
 
 // Routers
-app.use('/student', StudentRouter);
+app.use('/user', UserRouter);
 app.use('/post', PostRouter);
 
 

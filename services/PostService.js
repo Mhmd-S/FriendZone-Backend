@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
-import Student from '../models/Student';
+import User from '../models/User';
 
 import { AppError } from '../utils/errorHandler';
 
@@ -11,12 +11,12 @@ const getPost = async(postId) => {
     return post;
 }
 
-const getPosts = async(page, userID) => {
-    const user = await Student.findById(userID);
-    const friendsIDs = user.friends;
+const getPosts = async(page, userId) => {
+    const user = await User.findById(userId);
+    const friendsIds = user.friends;
 
     const posts = await Post
-                            .find({ author: { $in : friendsIDs}  })
+                            .find({ author: { $in : friendsIds}  })
                             .sort({ timestamp: -1 })
                             .skip((page-1)*15)
                             .limit(15); 

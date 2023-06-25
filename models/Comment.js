@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const CommentSchema = new Schema({
     author: {
         type: Schema.Types.ObjectId,
-        ref: 'Student',
+        ref: 'User',
         required: true,
     },
     content: {
@@ -15,7 +15,7 @@ const CommentSchema = new Schema({
     likes: {
         type: [Schema.Types.ObjectId],
         default: [],
-        ref: 'Student',
+        ref: 'User',
     }
 }, { timestamps: true })
 

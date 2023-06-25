@@ -1,36 +1,36 @@
-import * as StudentService from '../services/StudentService';
+import * as UserService from '../services/UserService';
 import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
-import Student from '../models/Student';
+import User from '../models/User';
 import passport from 'passport';
 import '../authentication/passport-config';
 
-const getStudent = async(req,res,next) => {
+const getUser = async(req,res,next) => {
     try{
-        const userId = req.query.studentId;
-        const studentInfo = await StudentService.getStudent(userId);
-        res.json({ status:"OK", result: studentInfo });
+        const userId = req.query.UserId;
+        const userInfo = await UserService.getUser(userId);
+        res.json({ status:"OK", result: userInfo });
     } catch(err) {
         next(err);
     }
 };
 
-const deleteStudent = async(req,res,next) => {
+const deleteUser = async(req,res,next) => {
     try{
-        const result = await StudentService.deleteStudent(req.params.studentId);
-        res.json({ status:"OK", result: "Student deleted successfully"})
+        const result = await UserService.deleteUser(req.params.UserId);
+        res.json({ status:"OK", result: "User deleted successfully"})
     } catch(err) {
         next(err);
     }
 }
 
-const createStudent = [
+const createUser = [
     body('email')
         .exists().withMessage('Email field is required')
         .isEmail().withMessage('Email is not valid')
         .custom(async(value, { req } ) => { 
                 // Checks if the email is already registered
-                const user = await Student.findOne({ email: value }).exec(); // Returns null if no user is found
+                const user = await User.findOne({ email: value }).exec(); // Returns null if no user is found
                 if (user !== null) {
                     throw new Error("Email is already registered");
                 } 
@@ -68,7 +68,7 @@ const createStudent = [
             if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
 
             const { email, password, firstName, lastName, dob, phoneNumber } = req.body;
-            const user = await StudentService.createStudent({ email, password, firstName, lastName, dob, phoneNumber });
+            const user = await UserService.createUser({ email, password, firstName, lastName, dob, phoneNumber });
             res.json({ status: "OK", result: user });
         } catch(err) {
             next(err);
@@ -102,7 +102,7 @@ const updateProfilePicture = [
     (req,res,next) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
-        StudentService.updateProfilePicture( req.user._id ,req.files.imageField)
+        UserService.updateProfilePicture( req.user._id ,req.files.imageField)
             .then(result => {
                 res.json({ status: "OK", result: "Profile picture updated" });
             })
@@ -114,11 +114,11 @@ const updateProfilePicture = [
 
 const requestFriend = async(req,res,next) => {
     // req.query.userId is the id of the user to send friend request to
-    if (!req.query.studentId || req.user._id == req.query.studentId) {
+    if (!req.query.userId || req.user._id == req.query.userId) {
         next(new AppError(400, "Invalid ?userId query value"));
     }
 
-    StudentService.requestFriend(req.user._id, req.query.studentId)
+    UserService.requestFriend(req.user._id, req.query.userId)
         .then(result => {
             res.json({ status: "OK", result: "Friend request sent"});
         }).catch(err => {
@@ -127,7 +127,7 @@ const requestFriend = async(req,res,next) => {
 }
 
 const acceptFriend = async (req,res,next) => {
-    StudentService.acceptFriend(req.query.studentId, req.user._id)
+    UserService.acceptFriend(req.query.userId, req.user._id)
         .then(result => {
             res.json({ status: "OK", result: "Friend request accepted"});
         })
@@ -142,7 +142,7 @@ const login = (req, res, next)  => {
         return next(new AppError(400, 'auth/user-already-logged-in'));
     }
 
-    passport.authenticate('student-local', (err,user,info) => {
+    passport.authenticate('user-local', (err,user,info) => {
         if (err) { return next(new AppError(500, err)) };
 
         if (!user) { return next(new AppError(400, info.message)) };
@@ -154,4 +154,4 @@ const login = (req, res, next)  => {
     })(req,res,next);
 }
 
-export { getStudent, createStudent, deleteStudent, updateProfilePicture, login, requestFriend, acceptFriend };
+export { getUser, createUser, deleteUser, updateProfilePicture, login, requestFriend, acceptFriend };
