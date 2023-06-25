@@ -1,6 +1,7 @@
 import mongoose from 'mongoose';
 import Post from '../models/Post';
 import Comment from '../models/Comment';
+import Student from '../models/Student';
 
 import { AppError } from '../utils/errorHandler';
 
@@ -10,17 +11,26 @@ const getPost = async(postId) => {
     return post;
 }
 
-const getPosts = async(page) => {
-    const posts = await Post.find({}).sort({ date: 'desc' }).skip((page-1)*7).limit(7);
+const getPosts = async(page, userID) => {
+    const user = await Student.findById(userID);
+    const friendsIDs = user.friends;
+
+    const posts = await Post
+                            .find({ author: { $in : friendsIDs}  })
+                            .sort({ timestamp: -1 })
+                            .skip((page-1)*15)
+                            .limit(15); 
     return posts;
 }
 
 const createPost = async(postObj) => {
     const newPost = new Post({...postObj});
+    
     newPost.save()
         .then(savePostResult => {
             return savePostResult;
         })
+        .catch((err) => console.log(err))
 }
 
 const updatePost = async(postId,newPostObj) => {
@@ -38,7 +48,7 @@ const updatePost = async(postId,newPostObj) => {
     }
 }
 
-const deletePost = async(postId) => {
+const deletePost = async(postId) => { // Does it remove the post from the user?
     const post = await Post.findById(postId).populate('comments').exec();
     if (post === null) throw new AppError(400,' Invalid :postId parameter');
 
@@ -51,7 +61,7 @@ const likePost = async(userId, postId) => {
     return result;
 }
 
-const unLikePost = async(userId, postId) => {
+const unLikePost = async(userId, postId) => { // Does it remove the like from user?
     const result = await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } });
     return result;
 }
@@ -63,10 +73,12 @@ const addCommentToPost = async(postId, commentObj) => {
     return result;
 }
 
-const deleteCommentFromPost = async(postId, commentId) => {
+const deleteCommentFromPost = async(postId, commentId) => { // Does it remove comment from user?
     const result = await Post.findByIdAndUpdate(postId, { $pull: { commentId }});
     return result;
 }
     
 
 export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost, addCommentToPost, deleteCommentFromPost};
+
+// Continue testing the user posting , then test the redirectio when loggin in and the regestring is missing some fields

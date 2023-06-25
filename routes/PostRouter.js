@@ -1,5 +1,6 @@
 import express from "express";
 import * as PostController from "../controllers/PostController";
+import checkAuth from '../authentication/checkAuth';
 
 let router = express.Router();
 
@@ -7,27 +8,27 @@ let router = express.Router();
 router.get('/:postId', PostController.getPost);
 
 // Get all a certain amount of posts
-// router.get('/', PostController.getPosts);
+router.get('/posts', PostController.getPosts);
 
 // Create a post
-router.post('/create-post', PostController.createPost);
+router.post('/create-post', checkAuth, PostController.createPost);
 
 // Like a post
-router.put('/like/:postId', PostController.likePost);
+router.put('/like/:postId', checkAuth, PostController.likePost);
 
 // Unlike a post
-router.put('/unLike/:postId', PostController.unLikePost);
+router.put('/unLike/:postId', checkAuth, PostController.unLikePost);
 
 // Add a comment to post
-router.put('/comment/:postId', PostController.addCommentToPost);
+router.put('/comment/:postId', checkAuth, PostController.addCommentToPost);
 
 // Update a post
-router.put('/:postId', PostController.updatePost);
+router.put('/:postId', checkAuth, PostController.updatePost);
 
 // Delete a post
-router.delete('/:postId', PostController.deletePost );
+router.delete('/:postId', checkAuth, PostController.deletePost );
 
 // Delete a comment to post
-router.delete('/comment/:postId/:commentId', PostController.deleteCommentFromPost);
+router.delete('/comment/:postId/:commentId', checkAuth, PostController.deleteCommentFromPost);
             
 export default router;

@@ -5,10 +5,11 @@ import cors from 'cors';
 import session from 'express-session';
 import configurePassport from './authentication/passport-config';
 import { AppError, errorHandlers } from './utils/errorHandler';
+import  MongoStore from 'connect-mongo';
 
 // Import routers
 import StudentRouter from './routes/StudentRouter';
-import PostRouter from './routes/PostRouter';
+import PostRouter from './routes/PostRouter';   
 
 const app = express();
 
@@ -36,7 +37,13 @@ const passport = configurePassport();
 app.use(cors(corsOption));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
-app.use(session({ secret: process.env.session_secret, resave:false, saveUninitialized:true }));
+app.use(session({ secret: process.env.session_secret, 
+                resave:false, 
+                saveUninitialized:true, 
+                store: MongoStore.create({
+                    client: mongoose.connection.getClient()
+                }),    
+            }));
 app.use(passport.initialize());
 app.use(passport.session());
 

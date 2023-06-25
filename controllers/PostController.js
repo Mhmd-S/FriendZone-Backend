@@ -16,8 +16,17 @@ const getPost = async(req,res,next) => {
     }
 }
 
-// const getPosts = async(req,res,next) => {
-// }
+const getPosts = async(req,res,next) => {
+    try {
+        const page = req.query.page;
+        const userID = req.user._id;
+        if (!page) throw new AppError(400, 'Invalid ?page value')
+        const posts = await PostService.getPosts(page, userID); 
+        res.status(200).json({status:"OK", result: posts});
+    } catch (err) {
+        next(err);
+    }
+}
 
 const createPost = [
     body('content')
@@ -34,7 +43,7 @@ const createPost = [
 
             const postInfo = {
                 content: req.body.content,
-                author: req.user._id, // Recieved when verifying the cookies
+                author: req.user._id,
             }
 
             const post = await PostService.createPost(postInfo);
@@ -162,4 +171,4 @@ const deleteCommentFromPost = async(req,res,next) => {
     }
 }
 
-export { getPost, createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };
+export { getPost, getPosts,createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };
