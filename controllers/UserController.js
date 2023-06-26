@@ -136,34 +136,47 @@ const acceptFriend = async (req,res,next) => {
         })
 }
 
-const login = (req, res, next)  => {
+const login = [
+    body('email')
+        .exists().withMessage('Email field is required')
+        .isEmail().withMessage('Email is not valid')
+        .escape(),
+    body('password')
+        .exists().withMessage('Password field is required')
+        .escape()
+    ,(req,res,next) =>{
 
-    if (req.isAuthenticated()) {
-        return next(new AppError(400, 'auth/user-already-logged-in'));
-    }
+        const errors = validationResult(req);
 
-    passport.authenticate('user-local', (err,user,info) => {
-        if (err) { return next(new AppError(500, err)) };
+        if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
 
-        if (!user) { return next(new AppError(400, info.message)) };
+        if (req.isAuthenticated()) {
+            return next(new AppError(400, 'auth/user-already-logged-in'));
+        }
+        
+        passport.authenticate('user-local', (err,user,info) => { // Something wrong here.
+            if (err) { return next(new AppError(500, err)) };
 
-        req.login(user, (err) => {
-            if(err) { return next(new AppError(500, err)) };
-            return res.json({ status: "success", data: user });
-        })
-    })(req,res,next);
+            if (!user) { return next(new AppError(400, info.message)) }; 
+
+            req.login(user, (err) => {
+                if(err) { return next(new AppError(500, err)) };
+                return res.json({ status: "success", data: user });
+            })
+        })(req,res,next);
 }
+]
 
 const logout = (req,res,next) => {
     req.logout();
     res.json({ status: "success", data: null })
 }
 
-const authStatus = (req,res,next) => {
+const authStatus = async(req,res,next) => {
     if(req.isAuthenticated) {
-        res.json({ status: "success", data: {isAuthenticated: true }})
+        res.json({ status: "success", data: { isAuthenticated: true, user: req.user }});
     } else {
-        res.json({ status: "success", data: { isAuthenticated: false }})
+        res.json({ status: "success", data: { isAuthenticated: false, user: null }});
     }
 }
 

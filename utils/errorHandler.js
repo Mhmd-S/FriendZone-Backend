@@ -14,7 +14,6 @@ const AppError = function(type, detail) {
       res.status(err?.type || 500 ).json({status: "fail", data: err.detail })
     },
     handleDbCastError(err, res){
-      console.log(err.reason.BSONError)
       res.status(400).json({ status: "fail", error: { status: "fail", data:{error: `Invalid ${err.path} value. Check the parameter/query.`}} })
     },
     handleDbValidationError(err, res) {

@@ -19,7 +19,7 @@ const configurePassport = () => {
               return done(null, false, { message: 'Invalid email or password' });
           }
 
-          return bcrypt.compare(password, User.password)
+          return bcrypt.compare(password, user.password)
             .then((res) => {
               if (res) {
                 const { _id, email, firstName, lastName } = user;

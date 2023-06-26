@@ -39,7 +39,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true}));
 app.use(session({ secret: process.env.session_secret, 
                 resave:false, 
-                saveUninitialized:true, 
+                saveUninitialized:false, 
                 store: MongoStore.create({
                     client: mongoose.connection.getClient()
                 }),
