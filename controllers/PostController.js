@@ -1,4 +1,4 @@
-import { body, validationResult } from 'express-validator';
+import { body, validationdata } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
 
@@ -10,7 +10,7 @@ const getPost = async(req,res,next) => {
         const postId = req.params.postId;
         if (!postId) throw new AppError(400, 'Invalid :postId parameter');
         const post = await PostService.getPost(postId);
-        res.status(200).json({status:"OK", result: post })
+        res.status(200).json({status:"success", data: post })
     } catch (err) {
         next(err);
     }
@@ -22,7 +22,7 @@ const getPosts = async(req,res,next) => {
         const userID = req.user._id;
         if (!page) throw new AppError(400, 'Invalid ?page value')
         const posts = await PostService.getPosts(page, userID); 
-        res.status(200).json({status:"OK", result: posts});
+        res.status(200).json({status:"success", data: posts});
     } catch (err) {
         next(err);
     }
@@ -36,7 +36,7 @@ const createPost = [
     .escape(),
     async(req,res,next) => {
         try{
-            const errors = validationResult(req);
+            const errors = validationdata(req);
             if (!errors.isEmpty()) {
                 throw new AppError(400, errors.array());
             }
@@ -47,7 +47,7 @@ const createPost = [
             }
 
             const post = await PostService.createPost(postInfo);
-            res.status(200).json({status: "OK", result: post});
+            res.status(200).json({status: "success", data: post});
         } catch (err) {
             console.log(err);
             next(err);
@@ -66,18 +66,18 @@ const updatePost = [
             const postId = req.params.postId;
             if (!postId) throw new AppError(400,'Invalid :postId parameter');
 
-            const errors = validationResult(req);
+            const errors = validationdata(req);
             if (!errors.isEmpty()) {
                 throw new AppError(400, errors.array());
             }
 
             const newPostInfo = {
                 content: req.body.content,
-                author: req.userId, // Recieved when verifying the cookies
+                author: req.userId, // Recieved when verifying the cosuccessies
             }
 
-            const postResult = await PostService.updatePost(postId, newPostInfo);
-            res.status(200).json({ status:"OK", result: postResult });
+            const postdata = await PostService.updatePost(postId, newPostInfo);
+            res.status(200).json({ status:"success", data: postdata });
         } catch(err) {
             console.log(err);
             next(err);
@@ -90,8 +90,8 @@ const deletePost = [
         try {
             const postId = req.params.postId;
             if (!postId) throw new AppError(400,'Invalid :postId parameter');
-            const deleteResult = await PostService.deletePost(postId);
-            res.status(200).json({ status:"OK", result: deleteResult})
+            await PostService.deletePost(postId);
+            res.status(200).json({ status:"success", data: null})
         }catch (err) {
             next(err);
         }
@@ -105,8 +105,8 @@ const likePost = async(req,res,next) => {
 
         if (!userId || !postId) throw new AppError(400, "Invalid :postId paramter or No user ID found")
 
-        const result = PostService.likePost(userId, postId);
-        res.json({ status: "OK", result: "Post liked successfully" })
+        const data = PostService.likePost(userId, postId);
+        res.json({ status: "success", data: null })
     } catch(err) {
         next(err);
     }
@@ -119,8 +119,8 @@ const unLikePost = async(req,res,next) => {
 
         if (!userId || !postId) throw new AppError(400, "Invalid :postId paramter or No user ID found")
 
-        const result = PostService.unLikePost(userId, postId);
-        res.json({ status: "OK", result: "Post unliked successfully" })
+        const data = PostService.unLikePost(userId, postId);
+        res.json({ status: "success", data: null })
     } catch(err) {
         next(err);
     }
@@ -145,9 +145,9 @@ const addCommentToPost = [
                 content: req.body.content,    
             };
 
-            const result = await PostService.addCommentToPost(postId, commentObj)
+            const data = await PostService.addCommentToPost(postId, commentObj)
 
-            res.json({ status: "OK", result: "Comment added successfully", comment: result.content});
+            res.json({ status: "success", data: data});
             
         } catch(err) {
             next(err);
@@ -164,7 +164,9 @@ const deleteCommentFromPost = async(req,res,next) => {
         throw new AppError(400, "invalid :postId paramter or :commentId")
     }
 
-    const result = PostService.deleteCommentFromPost(postId, commentId);
+    const data = PostService.deleteCommentFromPost(postId, commentId);
+
+    res.json({ status: "success", data: null })
 
     } catch (err) {
         next(err);

@@ -54,8 +54,7 @@ const requestFriend = async(userId, friendId) =>  {// Check this
     // userId is the user who is sending the request
     const isFriendsOrRequest = await checkIfFriendsOrRequests(userId, friendId);
 
-    if (isFriendsOrRequest) {
-        console.log("Shit")
+    if (isFriendsOrRequest) { // If they are friends or if there is already a friend request between them then return
         return;
     }
     

@@ -9,7 +9,7 @@ const getUser = async(req,res,next) => {
     try{
         const userId = req.query.UserId;
         const userInfo = await UserService.getUser(userId);
-        res.json({ status:"OK", result: userInfo });
+        res.json({ status:"success", data: userInfo });
     } catch(err) {
         next(err);
     }
@@ -18,7 +18,7 @@ const getUser = async(req,res,next) => {
 const deleteUser = async(req,res,next) => {
     try{
         const result = await UserService.deleteUser(req.params.UserId);
-        res.json({ status:"OK", result: "User deleted successfully"})
+        res.json({ status:"success", data: null})
     } catch(err) {
         next(err);
     }
@@ -69,7 +69,7 @@ const createUser = [
 
             const { email, password, firstName, lastName, dob, phoneNumber } = req.body;
             const user = await UserService.createUser({ email, password, firstName, lastName, dob, phoneNumber });
-            res.json({ status: "OK", result: user });
+            res.json({ status: "success", data: user });
         } catch(err) {
             next(err);
         }
@@ -104,7 +104,7 @@ const updateProfilePicture = [
         if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
         UserService.updateProfilePicture( req.user._id ,req.files.imageField)
             .then(result => {
-                res.json({ status: "OK", result: "Profile picture updated" });
+                res.json({ status: "success", data: null });
             })
             .catch(err => {
                 next(err);
@@ -120,7 +120,7 @@ const requestFriend = async(req,res,next) => {
 
     UserService.requestFriend(req.user._id, req.query.userId)
         .then(result => {
-            res.json({ status: "OK", result: "Friend request sent"});
+            res.json({ status: "success", data: null });
         }).catch(err => {
             next(err);
         })
@@ -129,7 +129,7 @@ const requestFriend = async(req,res,next) => {
 const acceptFriend = async (req,res,next) => {
     UserService.acceptFriend(req.query.userId, req.user._id)
         .then(result => {
-            res.json({ status: "OK", result: "Friend request accepted"});
+            res.json({ status: "success", data: null });
         })
         .catch(err => {
             next(err);
@@ -149,9 +149,14 @@ const login = (req, res, next)  => {
 
         req.login(user, (err) => {
             if(err) { return next(new AppError(500, err)) };
-            return res.json({ status: "OK", result: user });
+            return res.json({ status: "success", data: user });
         })
     })(req,res,next);
 }
 
-export { getUser, createUser, deleteUser, updateProfilePicture, login, requestFriend, acceptFriend };
+const logout = (req,res,next) => {
+    req.logout();
+    res.json({ status: "success", data: null })
+}
+
+export { getUser, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend };

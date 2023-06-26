@@ -20,7 +20,7 @@ async function main() {
     await mongoose.connect(process.env.MONGO_URL);
 }
 
-main().catch(err => console.log('Mongo Connection error'));
+main().catch(err => console.error("Cannot connect to database"));
 
 // Configs for the global middleware
 const corsOption = { // Change later. // Config for the CORS
