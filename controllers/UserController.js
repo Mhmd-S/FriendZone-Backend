@@ -153,7 +153,7 @@ const login = [
         if (req.isAuthenticated()) {
             return next(new AppError(400, 'auth/user-already-logged-in'));
         }
-        
+
         passport.authenticate('user-local', (err,user,info) => { // Something wrong here.
             if (err) { return next(new AppError(500, err)) };
 
@@ -173,10 +173,10 @@ const logout = (req,res,next) => {
 }
 
 const authStatus = async(req,res,next) => {
-    if(req.isAuthenticated) {
-        res.json({ status: "success", data: { isAuthenticated: true, user: req.user }});
-    } else {
+    if(!req.isAuthenticated() || !req.session || !req.session.passport || !req.session.passport.user) {
         res.json({ status: "success", data: { isAuthenticated: false, user: null }});
+    } else {
+        res.json({ status: "success", data: { isAuthenticated: true, user: req.user }});
     }
 }
 
