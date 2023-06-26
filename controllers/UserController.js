@@ -159,4 +159,12 @@ const logout = (req,res,next) => {
     res.json({ status: "success", data: null })
 }
 
-export { getUser, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend };
+const authStatus = (req,res,next) => {
+    if(req.isAuthenticated) {
+        res.json({ status: "success", data: {isAuthenticated: true }})
+    } else {
+        res.json({ status: "success", data: { isAuthenticated: false }})
+    }
+}
+
+export { getUser, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend, authStatus };

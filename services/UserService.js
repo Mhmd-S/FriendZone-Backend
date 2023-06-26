@@ -115,5 +115,3 @@ const rejectFriend = async(userId, friendId) => { // Continue this
 }
 
 export { createUser, getUser, deleteUser, updateProfilePicture, requestFriend, acceptFriend, rejectFriend };
-
-// Test UserService.js *****

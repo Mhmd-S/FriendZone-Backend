@@ -5,7 +5,7 @@ import checkAuth from "../authentication/checkAuth";
 let router = express.Router();
 
 router.get("/getUser", UserController.getUser);
-router.get("/auth", checkAuth);
+router.get("/auth", UserController.authStatus);
 
 router.post("/register", UserController.createUser);
 
@@ -20,8 +20,5 @@ router.delete("/:userId", UserController.deleteUser);
 
 export default router;
 
-// Fix your backend
-// Clean the responses
-// do the check auth
 
 
