@@ -24,10 +24,11 @@ main().catch(err => console.error("Cannot connect to database"));
 
 // Configs for the global middleware
 const corsOption = { // Change later. // Config for the CORS
-    'origin': '*',
+    'origin': 'http://127.0.0.1:5173',
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
-    'optionsSuccessStatus': 204
+    'optionsSuccessStatus': 204,
+    'credentials' : true,
   }
 
 // Configuring passport

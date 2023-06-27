@@ -1,4 +1,4 @@
-import { body, validationdata } from 'express-validator';
+import { body, validateResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
 
@@ -30,15 +30,16 @@ const getPosts = async(req,res,next) => {
 
 const createPost = [
     body('content')
-    .exists().withMessage('Content field is required')
-    .trim()
-    .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
-    .escape(),
+        .exists().withMessage('Content field is required')
+        .trim()
+        .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
+        .escape(),
     async(req,res,next) => {
         try{
-            const errors = validationdata(req);
+            const errors = validateResult(req);
             if (!errors.isEmpty()) {
-                throw new AppError(400, errors.array());
+                const errorObject = { [errors.path]: errors.msg };
+                return next(new AppError(400, errorObject));
             }
 
             const postInfo = {
@@ -66,7 +67,7 @@ const updatePost = [
             const postId = req.params.postId;
             if (!postId) throw new AppError(400,'Invalid :postId parameter');
 
-            const errors = validationdata(req);
+            const errors = validateResult(req);
             if (!errors.isEmpty()) {
                 throw new AppError(400, errors.array());
             }
