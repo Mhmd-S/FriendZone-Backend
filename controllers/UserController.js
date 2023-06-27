@@ -4,6 +4,7 @@ import { AppError } from '../utils/errorHandler';
 import User from '../models/User';
 import passport from 'passport';
 import '../authentication/passport-config';
+import { isDraft } from '@reduxjs/toolkit';
 
 const getUser = async(req,res,next) => {
     try{
@@ -18,6 +19,7 @@ const getUser = async(req,res,next) => {
 const deleteUser = async(req,res,next) => {
     try{
         const result = await UserService.deleteUser(req.params.UserId);
+        // Delete user session!!!
         res.json({ status:"success", data: null})
     } catch(err) {
         next(err);
@@ -25,9 +27,20 @@ const deleteUser = async(req,res,next) => {
 }
 
 const createUser = [
+    body('username')
+        .exists().withMessage('Username field is required')
+        .matches('/^[a-zA-Z0-9_]+$/').withMessage('Username has a min of 4 and max of 15 characters. Can only include alphabets, numbers and underscores')
+        .custom(async(value, { req } ) => { 
+            // Checks if the username is already registered
+            const user = await User.findOne({ username: value }).exec(); // Returns null if no user is found
+            if (user !== null) {
+                throw new Error("Username is already taken");
+            } 
+        })
+        .escape(),
     body('email')
         .exists().withMessage('Email field is required')
-        .isEmail().withMessage('Email is not valid')
+        .isEmail().withMessage('Email is invalid')
         .custom(async(value, { req } ) => { 
                 // Checks if the email is already registered
                 const user = await User.findOne({ email: value }).exec(); // Returns null if no user is found
@@ -48,27 +61,36 @@ const createUser = [
         .escape(),
     body('firstName')
         .exists().withMessage('firstName field is required')
-        .isLength({ min: 1 }).withMessage('First name is required')
+        .isAlpha().withMessage('First name needs to contain alphabets only')
+        .isLength({ min: 1, max: 50 }).withMessage('First name is required to have a minimum of 1 character and maximum of 50')
         .escape(),
     body('lastName')
-        .exists().withMessage('lastName is required')
-        .isLength({ min: 1 }).withMessage('Last name is required')
+        .exists().withMessage('lastName field is required')
+        .isAlpha().withMessage('Last name needs to contain alphabets only')
+        .isLength({ min: 1, max: 50 }).withMessage('Last name is required to have a minimum of 1 character and maximum of 50')
         .escape(),
     body('dob')
         .exists().withMessage('dob is required')
         .isDate().withMessage('Date of birth is required')
-        .escape(),
-    body('phoneNumber')
-        .exists().withMessage('phoneNumber is required')
-        .isMobilePhone('ms-MY').withMessage('Malaysian phone number is required')
+        .isAfter('1920-01-01').withMessage('Invalid date of birth')
+        .isBefore('2023-01-01').withMessage('Invalid date of birth')
         .escape(),
     async(req,res,next) => {
         try{
             const errors = validationResult(req);
-            if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
+            
+            if (!errors.isEmpty()) { // Making the error objects more concise. Instead of have 5 props into an object containing the error path and msg ex. { email: 'Email not valid' }
+                const errorsArray = errors.array();
+                const errorsObject = {};
+              
+                errorsArray.forEach((err) => {
+                  errorsObject[err.path] = err.msg;
+                });
+                return next(new AppError(400, errorsObject));
+            }
 
-            const { email, password, firstName, lastName, dob, phoneNumber } = req.body;
-            const user = await UserService.createUser({ email, password, firstName, lastName, dob, phoneNumber });
+            const { username, email, password, firstName, lastName, dob } = req.body;
+            const user = await UserService.createUser({ username, email, password, firstName, lastName, dob});
             res.json({ status: "success", data: user });
         } catch(err) {
             next(err);
@@ -138,38 +160,59 @@ const acceptFriend = async (req,res,next) => {
 
 const login = [
     body('email')
-        .exists().withMessage('Email field is required')
-        .isEmail().withMessage('Email is not valid')
-        .escape(),
+      .exists().withMessage('Email field is required')
+      .isEmail().withMessage('Email is not valid')
+      .escape(),
     body('password')
-        .exists().withMessage('Password field is required')
-        .escape()
-    ,(req,res,next) =>{
-
+      .exists().withMessage('Password field is required')
+      .escape(),
+    (req, res, next) => {
         const errors = validationResult(req);
-
-        if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
-
-        if (req.isAuthenticated()) {
-            return next(new AppError(400, 'auth/user-already-logged-in'));
+            
+        if (!errors.isEmpty()) { // Making the error objects more concise. Instead of have 5 props into an object containing the error path and msg ex. { email: 'Email not valid' }
+            const errorsArray = errors.array();
+            const errorsObject = {};
+          
+            errorsArray.forEach((err) => {
+              errorsObject[err.path] = err.msg;
+            });
+            return next(new AppError(400, errorsObject));
         }
-
-        passport.authenticate('user-local', (err,user,info) => { // Something wrong here.
-            if (err) { return next(new AppError(500, err)) };
-
-            if (!user) { return next(new AppError(400, info.message)) }; 
-
+  
+        if (req.isAuthenticated()) {
+          return next(new AppError(400, {auth: 'User already logged in'}));
+        }
+  
+        passport.authenticate('user-local', (err, user, info) => {
+            if (err) {
+              return next(new AppError(500,  {auth: "Couldn't proccess your request. Try again later."}));
+            }
+        
+            if (!user) {
+                console.log(info)
+              return next(new AppError(401, {auth: info.message}));
+            }
+        
             req.login(user, (err) => {
-                if(err) { return next(new AppError(500, err)) };
-                return res.json({ status: "success", data: user });
-            })
-        })(req,res,next);
-}
-]
+              if (err) {
+                return next(new AppError(500, err));
+              }
+          
+              return res.json({ status: "success", data: user });
+        });
+      })(req, res, () => {
+        // Empty callback to prevent further execution of middleware
+        return;
+      });
+    }
+  ];
+  
 
 const logout = (req,res,next) => {
-    req.logout();
-    res.json({ status: "success", data: null })
+    req.logout((err) => {
+        if (err) { return next(err); }
+        res.json({ status: "success", data:null })
+    });
 }
 
 const authStatus = async(req,res,next) => {

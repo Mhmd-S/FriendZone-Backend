@@ -57,6 +57,7 @@ app.use('/post', PostRouter);
 
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {
+    console.log()
     next(new AppError(404, 'Not Found'));
 });
 

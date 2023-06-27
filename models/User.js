@@ -3,6 +3,10 @@ import mongoose from "mongoose";
 const Schema = mongoose.Schema;
 
 const UserSchema = new Schema({
+    username:{
+        type: String,
+        required: true,
+    },
     email:{
         type: String,
         required: true,
@@ -16,18 +20,6 @@ const UserSchema = new Schema({
         required: true,
     },
     lastName:{
-        type: String,
-        required: true,
-    },
-    phoneNumber:{
-        type: Number,
-        required: true,
-    },
-    gender:{
-        type: String,
-        enum: ["male", "female"]
-    },
-    dob: {
         type: String,
         required: true,
     },
