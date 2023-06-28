@@ -1,4 +1,4 @@
-import { body, validateResult } from 'express-validator';
+import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
 
@@ -36,7 +36,7 @@ const createPost = [
         .escape(),
     async(req,res,next) => {
         try{
-            const errors = validateResult(req);
+            const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 const errorObject = { [errors.path]: errors.msg };
                 return next(new AppError(400, errorObject));
@@ -67,7 +67,7 @@ const updatePost = [
             const postId = req.params.postId;
             if (!postId) throw new AppError(400,'Invalid :postId parameter');
 
-            const errors = validateResult(req);
+            const errors = validationResult(req);
             if (!errors.isEmpty()) {
                 throw new AppError(400, errors.array());
             }

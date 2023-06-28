@@ -7,15 +7,21 @@ import { AppError } from '../utils/errorHandler';
 const getUser = async(userId) => {
     const user = await User.findById(userId).exec();
     if (user === null) {
-        throw new AppError(404, "User not found");
+        throw new AppError(404, {error: "User not found"});
     }
     return user;
+}
+
+const searchUsers = async(queryValue) => {
+    const re = new RegExp(queryValue, "i");
+    const users = await User.find({ username: re }).exec();
+    return users;
 }
 
 const createUser = async(userObj) => {
     bcrypt.hash(userObj.password, 10, (err, hash) => {
         if (err) {
-            throw new AppError(500, "User couldn't be created");
+            throw new AppError(500, {error: "User couldn't be created"});
         } 
 
         userObj.password = hash;
@@ -28,7 +34,7 @@ const createUser = async(userObj) => {
             })
             .catch((err)=> {
                 console.log(err);
-                throw new AppError(500, "User couldn't be created");
+                throw new AppError(500, {error:"User couldn't be created"});
             });
     } );
 }
@@ -46,7 +52,7 @@ const updateProfilePicture = async(id,imageData) => { // Yet to be tested
             User.findByIdAndUpdate(id, { profilePicture: fileUrl })
         })
         .catch((err) => {
-            throw new AppError(500, "Couldn't save image")
+            throw new AppError(500, {error:"Couldn't save image"})
         })
 };
 
@@ -89,7 +95,7 @@ const acceptFriend = async(userId, friendId) => {
      
     // Throw error if couldn't delete the friend who made request from the pending list of the user
     if(!removeFromPending){
-        return new AppError(400, "Couldn't accept friend request. Request may not exists.")
+        return new AppError(400, {error:"Couldn't accept friend request. Request may not exists."})
     }
     // Remove the request from the friend who made the request to the user
     const removeFromRequests = await User.findByIdAndUpdate(friendId, {$pull: { pendingRequests: new mongoose.Types.ObjectId(userId) }}).exec();
@@ -106,7 +112,7 @@ const rejectFriend = async(userId, friendId) => { // Continue this
     const removeFromPendingFriend = await User.findByIdAndUpdate(userId, {$pull: { pendingFriends: new mongoose.Types.ObjectId(friendId) }}).exec(); 
     // Throw if the request does not exist
     if(!removeFromPendingFriend){
-        return new AppError(400, "Couldn't reject friend request. Request may not exist.")
+        return new AppError(400, {error:"Couldn't reject friend request. Request may not exist."})
     }
     // Remove the request from the user who initiated the request
     const removeFromPendingRequest = await User.findByIdAndUpdate(friendId, {$pull: { pendingRequests: new mongoose.Types.ObjectId(userId) }}).exec();
@@ -114,4 +120,4 @@ const rejectFriend = async(userId, friendId) => { // Continue this
     return {addToFriendListToUser, addToFriendListToFriend};
 }
 
-export { createUser, getUser, deleteUser, updateProfilePicture, requestFriend, acceptFriend, rejectFriend };
+export { createUser, getUser, deleteUser, updateProfilePicture, requestFriend, acceptFriend, rejectFriend, searchUsers };

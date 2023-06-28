@@ -5,6 +5,7 @@ import checkAuth from "../authentication/checkAuth";
 let router = express.Router();
 
 router.get("/getUser", UserController.getUser);
+router.get("/search", UserController.searchUsers);
 router.get("/auth", UserController.authStatus);
 
 router.post("/register", UserController.createUser);

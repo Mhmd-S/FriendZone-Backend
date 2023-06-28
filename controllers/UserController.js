@@ -4,7 +4,6 @@ import { AppError } from '../utils/errorHandler';
 import User from '../models/User';
 import passport from 'passport';
 import '../authentication/passport-config';
-import { isDraft } from '@reduxjs/toolkit';
 
 const getUser = async(req,res,next) => {
     try{
@@ -15,6 +14,17 @@ const getUser = async(req,res,next) => {
         next(err);
     }
 };
+
+const searchUsers = async(req,res,next) => {
+    try {
+        const queryValue = req.query.keyword;
+        if (!queryValue) throw new AppError(400, 'Invalid search query');
+        const users = await UserService.searchUsers(queryValue);
+        res.json({ status: "success", data: users});
+    } catch(err) {
+        next(err);
+    }
+}
 
 const deleteUser = async(req,res,next) => {
     try{
@@ -29,7 +39,7 @@ const deleteUser = async(req,res,next) => {
 const createUser = [
     body('username')
         .exists().withMessage('Username field is required')
-        .matches('/^[a-zA-Z0-9_]+$/').withMessage('Username has a min of 4 and max of 15 characters. Can only include alphabets, numbers and underscores')
+        .not().matches('/^[a-zA-Z0-9_]{4,15}$/').withMessage('Username has a min of 4 and max of 15 characters. Can only include alphabets, numbers and underscores')
         .custom(async(value, { req } ) => { 
             // Checks if the username is already registered
             const user = await User.findOne({ username: value }).exec(); // Returns null if no user is found
@@ -223,4 +233,4 @@ const authStatus = async(req,res,next) => {
     }
 }
 
-export { getUser, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend, authStatus };
+export { getUser, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend, authStatus, searchUsers };

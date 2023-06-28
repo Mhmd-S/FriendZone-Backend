@@ -13,8 +13,9 @@ const configurePassport = () => {
       passwordField: 'password'
   }, async (username, password, done) => {
       try {
+          console.log(username);
           const user = await User.findOne({ email: username }).exec();
-          
+          console.log(user);
           if (!user) {
               return done(null, false, { message: 'Invalid email or password' });
           }
