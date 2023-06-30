@@ -28,12 +28,12 @@ const UserSchema = new Schema({
         ref: "User",
         default: []
     },
-    pendingRequests: {
+    pendingRequests: { // Friends that recieved a friend request from user
         type: [Schema.Types.ObjectId],
         ref: "User",
         default: []
     },
-    pendingFriends: {
+    pendingFriends: { // Friends that are waiting for the user's confirmation
         type: [Schema.Types.ObjectId],
         ref: "User",
         default: []

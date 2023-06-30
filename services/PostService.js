@@ -28,6 +28,9 @@ const createPost = async(postObj) => {
     
     newPost.save()
         .then(savePostResult => {
+            User.findByIdAndUpdate(postObj.author, { $push: { posts: savePostResult._id } })
+                .then(addPostToUserResult => { return{savePostResult, addPostToUserResult} })
+                .catch(err => console.log(err))
             return savePostResult;
         })
         .catch((err) => console.log(err))

@@ -4,17 +4,25 @@ import uploadImage from '../utils/uploadManager';
 import mongoose from 'mongoose';
 import { AppError } from '../utils/errorHandler';
 
-const getUser = async(userId) => {
-    const user = await User.findById(userId).exec();
+const getUser = async(username) => {
+    const user = await User.findOne({ username: username }, 'username friends pendingRequests pendingFriends posts').populate('friends', 'username').populate('pendingRequests', 'username').populate('pendingFriends', 'username').populate('posts').exec();
     if (user === null) {
         throw new AppError(404, {error: "User not found"});
     }
     return user;
 }
 
-const searchUsers = async(queryValue) => {
+const getUserFriends = async(userId) => {
+    const userFriends = await User.findById(userId, 'friends pendingRequests pendingFriends').populate('friends', 'username').populate('pendingFriends', 'username').populate('pendingRequests', 'username').exec();
+    if (userFriends === null) {
+        throw new AppError(404, {error: "Usern not found"})
+    }
+    return userFriends;
+}
+
+const searchUsers = async(queryValue, resultLimit) => {
     const re = new RegExp(queryValue, "i");
-    const users = await User.find({ username: re }).exec();
+    const users = await User.find({ username: re }, 'username friends posts').populate('friends').populate('posts').limit(resultLimit).exec();
     return users;
 }
 
@@ -22,7 +30,7 @@ const createUser = async(userObj) => {
     bcrypt.hash(userObj.password, 10, (err, hash) => {
         if (err) {
             throw new AppError(500, {error: "User couldn't be created"});
-        } 
+        }
 
         userObj.password = hash;
   
@@ -120,4 +128,4 @@ const rejectFriend = async(userId, friendId) => { // Continue this
     return {addToFriendListToUser, addToFriendListToFriend};
 }
 
-export { createUser, getUser, deleteUser, updateProfilePicture, requestFriend, acceptFriend, rejectFriend, searchUsers };
+export { createUser, getUser, getUserFriends, deleteUser, updateProfilePicture, requestFriend, acceptFriend, rejectFriend, searchUsers };

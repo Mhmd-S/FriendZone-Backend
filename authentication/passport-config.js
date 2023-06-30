@@ -23,8 +23,8 @@ const configurePassport = () => {
           return bcrypt.compare(password, user.password)
             .then((res) => {
               if (res) {
-                const { _id, email, firstName, lastName } = user;
-                return done(null, { _id, email, firstName, lastName });
+                const { _id, username, email, firstName, lastName, friends, pendingFriends, pendingRequests } = user;
+                return done(null, { _id, username, email, firstName, lastName, friends, pendingFriends, pendingRequests });
               } else {
                 return done(null, false, { message: "Incorrect password" });
               }

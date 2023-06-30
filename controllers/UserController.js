@@ -7,19 +7,31 @@ import '../authentication/passport-config';
 
 const getUser = async(req,res,next) => {
     try{
-        const userId = req.query.UserId;
-        const userInfo = await UserService.getUser(userId);
+        const username = req.query.username;
+        const userInfo = await UserService.getUser(username);
         res.json({ status:"success", data: userInfo });
     } catch(err) {
         next(err);
     }
 };
 
+const getUserFriends = async(req,res,next) => {
+    try {
+        const userId = req.user._id;
+        const userFriends = await UserService.getUserFriends(userId);
+        res.json({ status: "success", data: userFriends });
+    } catch(err) {
+        next(err);
+    }
+}
+
 const searchUsers = async(req,res,next) => {
     try {
         const queryValue = req.query.keyword;
+        const limit = req.query.limit;
+        if (!limit || limit > 15 || limit < 1) throw new AppError(400, 'Invalid limit query value. Must be between 1 and 15');
         if (!queryValue) throw new AppError(400, 'Invalid search query');
-        const users = await UserService.searchUsers(queryValue);
+        const users = await UserService.searchUsers(queryValue, limit);
         res.json({ status: "success", data: users});
     } catch(err) {
         next(err);
@@ -168,6 +180,16 @@ const acceptFriend = async (req,res,next) => {
         })
 }
 
+const rejectFriend = async (req,res,next) => {
+    UserService.rejectFriend(req.user._id, req.query.userId)
+        .then(result => {
+            res.json({ status: "success", data:null });
+        })
+        .catch(err => {
+            next(err)
+        })
+}
+
 const login = [
     body('email')
       .exists().withMessage('Email field is required')
@@ -233,4 +255,4 @@ const authStatus = async(req,res,next) => {
     }
 }
 
-export { getUser, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend, authStatus, searchUsers };
+export { getUser, getUserFriends, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend, rejectFriend, authStatus, searchUsers };
