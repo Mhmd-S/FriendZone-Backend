@@ -72,8 +72,9 @@ const requestFriend = async(userId, friendId) =>  {// Check this
         return;
     }
     
-    const result = await User.findByIdAndUpdate(friendId, { $push: { pendingFriends: new mongoose.Types.ObjectId(userId) }}).exec();
-    return result;
+    const resultFriendRequest = await User.findByIdAndUpdate(friendId, { $push: { pendingFriends: new mongoose.Types.ObjectId(userId) }}).exec();
+    const resultUserRequest = await User.findByIdAndUpdate(userId, { $push: { pendingRequests: new mongoose.Types.ObjectId(friendId) }}).exec();
+    return {resultFriendRequest, resultUserRequest};
 } 
 
 // Checks if both user's are friend or a request between them is established
@@ -100,14 +101,14 @@ const acceptFriend = async(userId, friendId) => {
     // userId is the user who is going to accept the request
     // Delete the pending friend request from the user
     const removeFromPending = await User.findByIdAndUpdate(userId, {$pull: { pendingFriends: new mongoose.Types.ObjectId(friendId) }}).exec();
-     
+    console.log(removeFromPending);
     // Throw error if couldn't delete the friend who made request from the pending list of the user
     if(!removeFromPending){
         return new AppError(400, {error:"Couldn't accept friend request. Request may not exists."})
     }
     // Remove the request from the friend who made the request to the user
     const removeFromRequests = await User.findByIdAndUpdate(friendId, {$pull: { pendingRequests: new mongoose.Types.ObjectId(userId) }}).exec();
-    
+
     // When user accepts a friend request, update his friend list and also the user who made the friend request.
     const addToFriendListToUser = await User.findByIdAndUpdate(userId, {$push: { friends: new mongoose.Types.ObjectId(friendId) }}).exec();
     const addToFriendListToFriend = await User.findByIdAndUpdate(friendId, {$push: { friends: new mongoose.Types.ObjectId(userId) }}).exec();

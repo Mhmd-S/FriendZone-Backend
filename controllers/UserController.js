@@ -171,7 +171,7 @@ const requestFriend = async(req,res,next) => {
 }
 
 const acceptFriend = async (req,res,next) => {
-    UserService.acceptFriend(req.query.userId, req.user._id)
+    UserService.acceptFriend(req.user._id, req.query.userId)
         .then(result => {
             res.json({ status: "success", data: null });
         })

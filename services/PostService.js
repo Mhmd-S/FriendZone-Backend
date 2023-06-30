@@ -11,15 +11,17 @@ const getPost = async(postId) => {
     return post;
 }
 
-const getPosts = async(page, userId) => {
-    const user = await User.findById(userId);
+const getPosts = async(page, userId) => { // This is not being called ??
+    const user = await User.findById(userId).exec();
     const friendsIds = user.friends;
-
+    console.log(friendsIds)
     const posts = await Post
                             .find({ author: { $in : friendsIds}  })
+                            .populate('author', 'username')
                             .sort({ timestamp: -1 })
                             .skip((page-1)*15)
-                            .limit(15); 
+                            .limit(15)
+                            .exec(); 
     return posts;
 }
 

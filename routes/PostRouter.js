@@ -4,11 +4,11 @@ import checkAuth from '../authentication/checkAuth';
 
 let router = express.Router();
 
-// Get a certain post using its id
-router.get('/:postId', PostController.getPost);
-
 // Get all a certain amount of posts
 router.get('/posts', PostController.getPosts);
+
+// Get a certain post using its id
+router.get('/:postId', PostController.getPost);
 
 // Create a post
 router.post('/create-post', checkAuth, PostController.createPost);

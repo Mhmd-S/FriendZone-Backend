@@ -14,13 +14,13 @@ const AppError = function(type, detail) {
       res.status(err?.type || 500 ).json({status: "fail", data: err.detail })
     },
     handleDbCastError(err, res){
-      res.status(400).json({ status: "fail", error: { status: "fail", data:{error: `Invalid ${err.path} value. Check the parameter/query.`}} })
+      res.status(400).json({ status: "fail", error: `Invalid ${err.path} value. Check the parameter/query.` })
     },
     handleDbValidationError(err, res) {
       const propertyNames = Object.keys(err.errors);
       const firstPropertyName = propertyNames[0];
       const firstPropertyValue = err.errors[firstPropertyName];
-      res.status(400).json({ status: "fail", data: {error: `Invalid ${firstPropertyValue.path} value. Check the parameter/query.`}})
+      res.status(400).json({ status: "fail", error: `Invalid ${firstPropertyValue.path} value. Check the parameter/query.`})
     }
   }
   

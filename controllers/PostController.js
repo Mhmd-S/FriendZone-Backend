@@ -50,7 +50,7 @@ const createPost = [
             const post = await PostService.createPost(postInfo);
             res.status(200).json({status: "success", data: post});
         } catch (err) {
-            console.log(err);
+            ;
             next(err);
         }
     }
@@ -80,7 +80,6 @@ const updatePost = [
             const postdata = await PostService.updatePost(postId, newPostInfo);
             res.status(200).json({ status:"success", data: postdata });
         } catch(err) {
-            console.log(err);
             next(err);
         }
     }
