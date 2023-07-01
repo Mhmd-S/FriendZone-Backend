@@ -19,10 +19,10 @@ const getPost = async(req,res,next) => {
 const getPosts = async(req,res,next) => {
     try {
         const page = req.query.page;
-        const userID = req.user._id;
+        const userID = req.user?._id ? req.user._id : null;
         if (!page) throw new AppError(400, 'Invalid ?page value')
-        const posts = await PostService.getPosts(page, userID); 
-        res.status(200).json({status:"success", data: posts});
+            const posts = await PostService.getPosts(page, userID); 
+            res.status(200).json({status:"success", data: posts});
     } catch (err) {
         next(err);
     }

@@ -12,16 +12,29 @@ const getPost = async(postId) => {
 }
 
 const getPosts = async(page, userId) => { // This is not being called ??
-    const user = await User.findById(userId).exec();
-    const friendsIds = user.friends;
-    console.log(friendsIds)
-    const posts = await Post
-                            .find({ author: { $in : friendsIds}  })
-                            .populate('author', 'username')
-                            .sort({ timestamp: -1 })
-                            .skip((page-1)*15)
-                            .limit(15)
-                            .exec(); 
+    
+    let posts;
+    
+    if (userId) {
+        const user = await User.findById(userId).exec();
+        const friendsIds = user.friends;
+        posts = await Post
+                    .find({ author: { $in : friendsIds}  })
+                    .populate('author', 'username')
+                    .sort({ timestamp: -1 })
+                    .skip((page-1)*15)
+                    .limit(15)
+                    .exec(); 
+    } else {
+        posts = await Post
+                    .find()
+                    .populate('author', 'username')
+                    .sort({ timestamp: -1, likes: -1 })
+                    .skip((page-1)*15)
+                    .limit(15)
+                    .exec(); 
+    }
+    
     return posts;
 }
 
@@ -62,12 +75,14 @@ const deletePost = async(postId) => { // Does it remove the post from the user?
 }
 
 const likePost = async(userId, postId) => {
-    const result = await Post.findByIdAndUpdate(postId, { $push: { likes: userId } });
-    return result;
+    const result = await Post.findByIdAndUpdate(postId, { $push: { likes: userId } }).exec();
+    const resultUser = await Post.findByIdAndUpdate(userId, { $push: { likedPosts: postId }}).exec();
+    return {result, resultUser};
 }
 
 const unLikePost = async(userId, postId) => { // Does it remove the like from user?
     const result = await Post.findByIdAndUpdate(postId, { $pull: { likes: userId } });
+    const resultUser = await Post.findByIdAndUpdate(userId, { $pull: { likedPosts: postId }}).exec();
     return result;
 }
 
@@ -75,11 +90,14 @@ const addCommentToPost = async(postId, commentObj) => {
     const comment = new Comment({...commentObj});
     const commentResult = comment.save();
     const result = await Post.findByIdAndUpdate(postId, { $push: { comments: new mongoose.Types.ObjectId(commentResult._id) } });
+    const resultUser = await Post.findByIdAndUpdate(userId, { $push: { commentedPosts : new mongoose.Types.ObjectId(commentResult._id) }}).exec();
     return result;
 }
 
 const deleteCommentFromPost = async(postId, commentId) => { // Does it remove comment from user?
     const result = await Post.findByIdAndUpdate(postId, { $pull: { commentId }});
+    const resultUser = await Post.findByIdAndUpdate(commentId.author, { $pull: { commentedPosts : commentResult._id }}).exec();
+
     return result;
 }
     

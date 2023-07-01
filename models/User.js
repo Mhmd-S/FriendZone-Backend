@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { SchemaTypeOptions } from "mongoose";
 
 const Schema = mongoose.Schema;
 
@@ -31,12 +31,22 @@ const UserSchema = new Schema({
     pendingRequests: { // Friends that recieved a friend request from user
         type: [Schema.Types.ObjectId],
         ref: "User",
-        default: []
+        default: [],
     },
     pendingFriends: { // Friends that are waiting for the user's confirmation
         type: [Schema.Types.ObjectId],
         ref: "User",
-        default: []
+        default: [],
+    },
+    likedPosts : {
+        type: [Schema.Types.ObjectId],
+        ref:"Post",
+        default: [],
+    },
+    commentedPosts: {
+        type: [Schema.Types.ObjectId],
+        ref: "Post",
+        default: [],
     },
     verified: {
         type: Boolean,
