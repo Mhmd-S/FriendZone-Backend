@@ -5,7 +5,13 @@ import mongoose from 'mongoose';
 import { AppError } from '../utils/errorHandler';
 
 const getUser = async(username) => {
-    const user = await User.findOne({ username: username }, 'username friends pendingRequests pendingFriends posts').populate('friends', 'username').populate('pendingRequests', 'username').populate('pendingFriends', 'username').populate('posts').exec();
+    const user = await User
+                        .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts')
+                        .populate('friends', 'username')
+                        .populate('pendingRequests', 'username')
+                        .populate('pendingFriends', 'username')
+                        .populate('posts')
+                        .exec();
     if (user === null) {
         throw new AppError(404, {error: "User not found"});
     }
@@ -13,7 +19,12 @@ const getUser = async(username) => {
 }
 
 const getUserFriends = async(userId) => {
-    const userFriends = await User.findById(userId, 'friends pendingRequests pendingFriends').populate('friends', 'username').populate('pendingFriends', 'username').populate('pendingRequests', 'username').exec();
+    const userFriends = await User
+                            .findById(userId, 'friends pendingRequests pendingFriends')
+                            .populate('friends', 'username')
+                            .populate('pendingFriends', 'username')
+                            .populate('pendingRequests', 'username')
+                            .exec();
     if (userFriends === null) {
         throw new AppError(404, {error: "Usern not found"})
     }

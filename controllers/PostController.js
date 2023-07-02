@@ -28,6 +28,22 @@ const getPosts = async(req,res,next) => {
     }
 }
 
+const getComments = async(req,res,next) => {
+    try {
+        const page = req.query.page;
+        
+        const postId = req.query.postId;
+        
+        if (!page) throw new AppError(400, 'Invalid ?page value');
+
+        const comments = await PostService.getComments(page, postId); 
+        console.log(comments)
+        res.status(200).json({status:"success", data: comments});
+    } catch (err) {
+        next(err);
+    }
+}
+
 const createPost = [
     body('content')
         .exists().withMessage('Content field is required')
@@ -173,4 +189,4 @@ const deleteCommentFromPost = async(req,res,next) => {
     }
 }
 
-export { getPost, getPosts,createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };
+export { getPost, getPosts, getComments, createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };

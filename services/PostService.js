@@ -11,31 +11,43 @@ const getPost = async(postId) => {
     return post;
 }
 
-const getPosts = async(page, userId) => { // This is not being called ??
-    
-    let posts;
-    
-    if (userId) {
-        const user = await User.findById(userId).exec();
-        const friendsIds = user.friends;
-        posts = await Post
-                    .find({ author: { $in : friendsIds}  })
-                    .populate('author', 'username')
-                    .sort({ timestamp: -1 })
-                    .skip((page-1)*15)
-                    .limit(15)
-                    .exec(); 
-    } else {
-        posts = await Post
-                    .find()
-                    .populate('author', 'username')
-                    .sort({ timestamp: -1, likes: -1 })
-                    .skip((page-1)*15)
-                    .limit(15)
-                    .exec(); 
-    }
-    
-    return posts;
+const getPosts = async (page, userId) => {
+  let posts;
+  if (userId) {
+    const user = await User.findById(userId).exec();
+    const friendsIds = user.friends;
+    posts = await Post.find({ author: { $in: [...friendsIds, userId] } })
+      .populate('author', 'username')
+      .sort({ timestamp: 1 })
+      .skip((page - 1) * 15)
+      .limit(15)
+      .exec();
+  } else {
+    posts = await Post.find()
+      .populate('author', 'username')
+      .sort({ timestamp: 1, likes: -1 })
+      .skip((page - 1) * 15)
+      .limit(15)
+      .exec();
+  }
+  return posts;
+};
+
+const getComments = async (page, postId) => { // fix this
+
+    const comments =  await Post.findById(postId, 'comments')
+        .populate({
+            path: 'comments',
+            populate: {
+                path: 'author',
+                select: 'username'
+            }
+        })
+        .sort({ timestamp: 1 })
+        .skip((page - 1) * 15)
+        .limit(15)
+        .exec();
+    return comments;
 }
 
 const createPost = async(postObj) => {
@@ -52,7 +64,7 @@ const createPost = async(postObj) => {
 }
 
 const updatePost = async(postId,newPostObj) => {
-    const post = await Post.findById(postId).populate('comments').exec();
+    const post = await Post.findById(postId).exec();
     if (post === null) throw new AppError(400, 'Invalid :postId parameter');
 
     const updatePost = await Post.updateOne({_id: postId}, {
@@ -67,7 +79,7 @@ const updatePost = async(postId,newPostObj) => {
 }
 
 const deletePost = async(postId) => { // Does it remove the post from the user?
-    const post = await Post.findById(postId).populate('comments').exec();
+    const post = await Post.findById(postId).exec();
     if (post === null) throw new AppError(400,' Invalid :postId parameter');
 
     const result = await Post.findByIdAndRemove(postId);
@@ -88,9 +100,9 @@ const unLikePost = async(userId, postId) => { // Does it remove the like from us
 
 const addCommentToPost = async(postId, commentObj) => {
     const comment = new Comment({...commentObj});
-    const commentResult = comment.save();
-    const result = await Post.findByIdAndUpdate(postId, { $push: { comments: new mongoose.Types.ObjectId(commentResult._id) } });
-    const resultUser = await Post.findByIdAndUpdate(userId, { $push: { commentedPosts : new mongoose.Types.ObjectId(commentResult._id) }}).exec();
+    const commentResult = await comment.save();
+    const result = await Post.findByIdAndUpdate(postId, { $push: { comments: commentResult._id  } }).exec();
+    const resultUser = await Post.findByIdAndUpdate(commentObj.author, { $push: { commentedPosts : commentResult._id }}).exec();
     return result;
 }
 
@@ -102,6 +114,6 @@ const deleteCommentFromPost = async(postId, commentId) => { // Does it remove co
 }
     
 
-export { getPost, getPosts, createPost, updatePost, likePost, unLikePost, deletePost, addCommentToPost, deleteCommentFromPost};
+export { getPost, getPosts, getComments, createPost, updatePost, likePost, unLikePost, deletePost, addCommentToPost, deleteCommentFromPost};
 
 // Continue testing the user posting , then test the redirectio when loggin in and the regestring is missing some fields

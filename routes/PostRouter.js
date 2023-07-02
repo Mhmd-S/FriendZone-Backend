@@ -1,11 +1,15 @@
 import express from "express";
 import * as PostController from "../controllers/PostController";
 import checkAuth from '../authentication/checkAuth';
+import Post from "../models/Post";
 
 let router = express.Router();
 
-// Get all a certain amount of posts
+// Get  a certain amount of posts
 router.get('/posts', PostController.getPosts);
+
+// Get a certain amount of comments from a post
+router.get('/comments', PostController.getComments);
 
 // Get a certain post using its id
 router.get('/:postId', PostController.getPost);
