@@ -5,7 +5,7 @@ import * as PostService from '../services/PostService';
 import Post from '../models/Post'
 import Comment from '../models/Comment'
 
-const getPost = async(req,res,next) => {
+export const getPost = async(req,res,next) => {
     try {
         const postId = req.params.postId;
         if (!postId) throw new AppError(400, 'Invalid :postId parameter');
@@ -16,7 +16,7 @@ const getPost = async(req,res,next) => {
     }
 }
 
-const getPosts = async(req,res,next) => {
+export const getPosts = async(req,res,next) => {
     try {
         const page = req.query.page;
         const userID = req.user?._id ? req.user._id : null;
@@ -28,23 +28,7 @@ const getPosts = async(req,res,next) => {
     }
 }
 
-const getComments = async(req,res,next) => {
-    try {
-        const page = req.query.page;
-        
-        const postId = req.query.postId;
-        
-        if (!page) throw new AppError(400, 'Invalid ?page value');
-
-        const comments = await PostService.getComments(page, postId); 
-        console.log(comments)
-        res.status(200).json({status:"success", data: comments});
-    } catch (err) {
-        next(err);
-    }
-}
-
-const createPost = [
+export const createPost = [
     body('content')
         .exists().withMessage('Content field is required')
         .trim()
@@ -72,7 +56,7 @@ const createPost = [
     }
 ]
 
-const updatePost = [
+export const updatePost = [
     body('content')
     .exists().withMessage('Content field is required')
     .trim()
@@ -101,7 +85,7 @@ const updatePost = [
     }
 ]
 
-const deletePost = [
+export const deletePost = [
     async(req,res,next) => {
         try {
             const postId = req.params.postId;
@@ -114,7 +98,7 @@ const deletePost = [
     }
 ]
 
-const likePost = async(req,res,next) => {
+export const likePost = async(req,res,next) => {
     try{
         const userId = req.user._id;
         const postId = req.params.postId;
@@ -128,7 +112,7 @@ const likePost = async(req,res,next) => {
     }
 }
 
-const unLikePost = async(req,res,next) => {
+export const unLikePost = async(req,res,next) => {
     try{
         const userId = req.user._id;
         const postId = req.params.postId;
@@ -141,52 +125,3 @@ const unLikePost = async(req,res,next) => {
         next(err);
     }
 }
-
-const addCommentToPost = [
-    body('content')
-    .exists().withMessage('Content field is required')
-    .trim()
-    .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
-    .escape(),
-    async(req,res,next) => {
-        try{
-            const postId = req.params.postId;
-
-            const post = await Post.findById(postId);
-            
-            if (!post) throw new AppError(400, "Invalid :postId parameter");
-
-            const commentObj = { // Something wrong here
-                author: req.user._id,
-                content: req.body.content,    
-            };
-
-            const data = await PostService.addCommentToPost(postId, commentObj)
-
-            res.json({ status: "success", data: data});
-            
-        } catch(err) {
-            next(err);
-        }        
-    }
-]
-
-const deleteCommentFromPost = async(req,res,next) => {
-    try {
-    const postId = req.params.postId;
-    const commentId = req.params.commentId;
-
-    if (!postId || !commentId) {
-        throw new AppError(400, "invalid :postId paramter or :commentId")
-    }
-
-    const data = PostService.deleteCommentFromPost(postId, commentId);
-
-    res.json({ status: "success", data: null })
-
-    } catch (err) {
-        next(err);
-    }
-}
-
-export { getPost, getPosts, getComments, createPost, updatePost, deletePost, likePost, unLikePost, addCommentToPost, deleteCommentFromPost };

@@ -9,7 +9,8 @@ import  MongoStore from 'connect-mongo';
 
 // Import routers
 import UserRouter from './routes/UserRouter';
-import PostRouter from './routes/PostRouter';   
+import PostRouter from './routes/PostRouter';     
+import CommentRouter from './routes/CommentRouter'; 
 
 const app = express();
 
@@ -45,7 +46,7 @@ app.use(session({ secret: process.env.session_secret,
                     client: mongoose.connection.getClient()
                 }),
                 cookie: {
-                    maxAge: 1000 * 30
+                    maxAge: 30 * 24 * 60 * 60 // 30 days
                 }  
             }));
 app.use(passport.initialize());
@@ -54,6 +55,7 @@ app.use(passport.session());
 // Routers
 app.use('/user', UserRouter);
 app.use('/post', PostRouter);
+app.use('/comment', CommentRouter);
 
 
 // Catching 404 and forwarding it to error handler

@@ -11,7 +11,6 @@ router.get("/search", UserController.searchUsers);
 router.get("/auth", UserController.authStatus);
 
 router.post("/register", UserController.createUser);
-
 router.post("/login", UserController.login);
 
 router.put("/profile-picture", UserController.updateProfilePicture);
