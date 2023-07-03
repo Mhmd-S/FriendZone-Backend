@@ -9,7 +9,6 @@ export const getComment = async(commentId) => {
 }
 
 export const getComments = async (page, postId) => { // fix this
-    console.log(page, postId)
     const comments =  await Post.findById(postId, 'comments')
         .populate({
             path: 'comments',
@@ -26,12 +25,12 @@ export const getComments = async (page, postId) => { // fix this
 }
 
 export const likeComment = async(commentId, userId) => {
-    const result = await Comment.findByIdAndUpdate(commentId, { $push: userId}).exec();
+    const result = await Comment.findByIdAndUpdate(commentId, { $push: { likes: userId} }).exec();
     return result;
 }
 
 export const unlikeComment = async(commentId, userId) => {
-    const result = await Comment.findByIdAndUpdate(commentId, { $pull: userId }).exec();
+    const result = await Comment.findByIdAndUpdate(commentId, { $pull: { likes: userId} }).exec();
     return result;
 }
     
@@ -45,7 +44,7 @@ export const addComment = async(postId, commentObj) => {
 
 export const deleteComment = async(commentId) => { // Does it remove comment from user?
     const deleteCommentRes = Comment.findByIdAndDelete(commentId).exec();
-    const deleteCommentFromPostRes = Post.findOneAndUpdate({ comments: { $in: commentId} }, { $pull : { comments : commentId }}).exec();
-    const deleteFromUser = User.findOneAndUpdate({ commentedPosts: { $in: commentId }}, { $pull : { comments: commentId }}).exec();
+    const deleteCommentFromPostRes = Post.findOneAndUpdate({ comments: { $in: [commentId]} }, { $pull : { comments : commentId }}).exec();
+    const deleteFromUser = User.findOneAndUpdate({ comments: { $in: [commentId] }}, { $pull : { comments: commentId }}).exec();
     return { deleteCommentRes, deleteCommentFromPostRes, deleteFromUser };
 }

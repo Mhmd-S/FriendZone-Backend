@@ -27,7 +27,7 @@ export const getComments = async(req,res,next) => { // TEST THISSS
 
         if (!mongoose.Types.ObjectId.isValid(postId)) throw new AppError(400, 'Invalid id query')
         
-        if (!page || isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
+        if (!page || Number.isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
 
         const comments = await CommentService.getComments(page, postId); 
 
@@ -68,26 +68,25 @@ export const addComment = [
 
 export const deleteComment = async(req,res,next) => {
     try {
-    const commentId = req.params.commentId;
+        const commentId = req.params.commentId;
 
-    if (!commentId) {
-        throw new AppError(400, "Invalid :commentId parameter")
-    }
+        if (!commentId) {
+            throw new AppError(400, "Invalid :commentId parameter")
+        }
 
-    const comment = await CommentService.getComment(commentId);
+        const comment = await CommentService.getComment(commentId);
 
-    if (!comment) {
-        throw new AppError(400, "Invalid :commentId paramter")
-    }
-    console.log(comment.author , req.user._id)
-    if (comment.author.toString() !== req.user._id.toString()) {
-        throw new AppError(401, "Unauthorized to delete comment!")
-    }
+        if (!comment) {
+            throw new AppError(400, "Invalid :commentId paramter")
+        }
+        console.log(comment.author , req.user._id)
+        if (comment.author.toString() !== req.user._id.toString()) {
+            throw new AppError(401, "Unauthorized to delete comment!")
+        }
 
-    const data = await CommentService.deleteComment(commentId);
+        const data = await CommentService.deleteComment(commentId);
 
-    res.json({ status: "success", data: null })
-
+        res.json({ status: "success", data: null })
     } catch (err) {
         next(err);
     }
@@ -96,10 +95,10 @@ export const deleteComment = async(req,res,next) => {
 
 export const likeComment = async(req,res,next) => {
     try {
-            const userId = req.user._id;
-            const commentId = req.params.commentId;
+        const userId = req.user._id;
+        const commentId = req.params.commentId;
 
-        if (!postId || !commentId) {
+        if (!commentId) {
             throw new AppError(400, "invalid :postId paramter or :commentId")
         }
 
@@ -116,7 +115,7 @@ export const unlikeComment = async(req,res,next) => {
         const userId = req.user._id;
         const commentId = req.params.commentId;
 
-        if (!postId || !commentId) {
+        if (!commentId) {
             throw new AppError(400, "invalid :postId paramter or :commentId")
         }
 

@@ -8,7 +8,6 @@ let router = express.Router();
 // Get  a certain amount of posts
 router.get('/posts', PostController.getPosts);
 
-
 // Get a certain post using its id
 router.get('/:postId', PostController.getPost);
 
