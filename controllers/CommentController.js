@@ -30,7 +30,7 @@ export const getComments = async(req,res,next) => { // TEST THISSS
         if (!page || Number.isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
 
         const comments = await CommentService.getComments(page, postId); 
-
+        console.log(comments);
         res.status(200).json({status:"success", data: comments});
     } catch (err) {
         next(err);

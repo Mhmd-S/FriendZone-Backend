@@ -60,6 +60,10 @@ const UserSchema = new Schema({
     profilePicture: {
         type: String,
     }, 
+    bio: {
+        type: String,
+        default:''
+    }
 }, { timestamps: true })
 
 const User = mongoose.model("User", UserSchema);

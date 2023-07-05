@@ -3,9 +3,6 @@ import * as CommentController from "../controllers/CommentController";
 import checkAuth from '../authentication/checkAuth';
 
 let router = express.Router();
-// Fix all this shit!
-
-
 
 // Get a certain amount of comments from a post
 router.get('/post', CommentController.getComments);

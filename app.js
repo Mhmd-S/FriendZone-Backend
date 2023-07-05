@@ -57,7 +57,6 @@ app.use('/user', UserRouter);
 app.use('/post', PostRouter);
 app.use('/comment', CommentRouter);
 
-
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {
     console.log()

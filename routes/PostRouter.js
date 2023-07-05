@@ -5,6 +5,8 @@ import Post from "../models/Post";
 
 let router = express.Router();
 
+router.get('/search', PostController.searchPosts);
+
 // Get  a certain amount of posts
 router.get('/posts', PostController.getPosts);
 
@@ -17,9 +19,10 @@ router.post('/create-post', checkAuth, PostController.createPost);
 // Like a post
 router.put('/like/:postId', checkAuth, PostController.likePost);
 
-// Unlike a post
-router.put('/unLike/:postId', checkAuth, PostController.unLikePost);
+// Unlike a post 
+router.delete('/unlike/:postId', checkAuth, PostController.unLikePost);
 
+// To be added to frontend
 // Update a post
 router.put('/:postId', checkAuth, PostController.updatePost);
 

@@ -11,6 +11,16 @@ export const getPost = async(postId) => {
     return post;
 }
 
+export const searchPosts = async(keyword, page) => {
+    const posts = await Post.find({ content: { $in: [keyword]}})
+                    .populate('author', 'username')
+                    .sort({ timestamp: 1 })
+                    .skip((page - 1) * 15)
+                    .limit(15)
+                    .exec();
+    return posts;
+}
+
 export const getPosts = async (page, userId) => {
   let posts;
   if (userId) {
@@ -32,8 +42,6 @@ export const getPosts = async (page, userId) => {
   }
   return posts;
 };
-
-
 
 export const createPost = async(postObj) => {
     const newPost = new Post({...postObj});
