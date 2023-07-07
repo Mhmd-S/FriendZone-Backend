@@ -19,7 +19,7 @@ export const getComment = async(req,res,next) => {
     }
 }
 
-export const getComments = async(req,res,next) => { // TEST THISSS
+export const getComments = async(req,res,next) => { 
     try {
         const page = req.query.page;
         

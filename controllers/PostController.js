@@ -15,6 +15,7 @@ export const getPost = async(req,res,next) => {
         next(err);
     }
 }
+
 export const searchPosts = async(req,res,next) => {
     try {
         const searchQuery = req.query.keywords;

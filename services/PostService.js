@@ -12,12 +12,14 @@ export const getPost = async(postId) => {
 }
 
 export const searchPosts = async(keyword, page) => {
-    const posts = await Post.find({ content: { $in: [keyword]}})
+    const re = new RegExp("\\b" + keyword + "\\b", "i");
+    const posts = await Post.find({ content: re }) // Use reges
                     .populate('author', 'username')
                     .sort({ timestamp: 1 })
                     .skip((page - 1) * 15)
                     .limit(15)
                     .exec();
+    console.log(posts)
     return posts;
 }
 
