@@ -59,6 +59,7 @@ const UserSchema = new Schema({
     },
     profilePicture: {
         type: String,
+        default: null
     }, 
     bio: {
         type: String,

@@ -6,11 +6,17 @@ import { AppError } from '../utils/errorHandler';
 
 const getUser = async(username) => {
     const user = await User
-                        .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts')
+                        .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts profilePicture bio')
                         .populate('friends', 'username')
                         .populate('pendingRequests', 'username')
                         .populate('pendingFriends', 'username')
-                        .populate('posts')
+                        .populate({
+                            path:'posts',
+                            populate :{
+                                path: 'author',
+                                select: 'username'
+                            }
+                        })
                         .exec();
     if (user === null) {
         throw new AppError(404, {error: "User not found"});
