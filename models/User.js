@@ -61,6 +61,10 @@ const UserSchema = new Schema({
         type: String,
         default: null
     }, 
+    profileHeader: {
+        type: String,
+        default: null
+    }, 
     bio: {
         type: String,
         default:''

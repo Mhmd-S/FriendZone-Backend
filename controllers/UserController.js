@@ -4,6 +4,8 @@ import { AppError } from '../utils/errorHandler';
 import User from '../models/User';
 import passport from 'passport';
 import '../authentication/passport-config';
+import formidable from 'formidable';
+import { uploadFileToStorage } from '../utils/GoogleCloudStorage';
 
 const getUser = async(req,res,next) => {
     try{
@@ -120,41 +122,39 @@ const createUser = [
     }
 ];
 
-const updateProfilePicture = [
-    // Validate the request
-    body('imageField')
-        .custom((value, { req }) => {
-            if (!req.file || !req.file.imageField) {
-              throw new Error('Image file is required.');
-            }
-            console.log(req.files)
-            const imageFile = req.files.imageField;
-        
-            // Check file size (max 1MB)
-            if (imageFile.size > 1024 * 1024) {
-              throw new Error('Image file size should be less than 1MB.');
-            }
-        
-            // Check file type
-            const allowedMimeTypes = ['image/jpeg', 'image/png'];
-            if (!allowedMimeTypes.includes(imageFile.mimetype)) {
-              throw new Error('Only JPEG, and PNG are allowed.');
-            }
-        
-            return true; // Validation passed
-        }),
-    (req,res,next) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) return next(new AppError(400, errors.array()));
-        UserService.updateProfilePicture( req.user._id ,req.files.imageField)
-            .then(result => {
-                res.json({ status: "success", data: null });
-            })
-            .catch(err => {
-                next(err);
-            });
+  
+const updateProfile = async (req, res, next) => {
+  const form = formidable();
+
+  form.parse(req, async (err, fields, files) => {
+    if (err) {
+      next(new AppError(500, "Could not update user's profile"))
     }
-]
+
+    try {
+        if(files.profilePicture){
+            const fileNameProfile = req.user.id + '_profile_picture';
+            const destinationProfile = `profile-pictures/${fileNameProfile}`;
+            const uploadedProfilePicture = await uploadFileToStorage(files.profilePicture.PresistentFile, destinationProfile);
+            UserService.updateProfilePictures(req.user.id, uploadedProfilePicture);
+        }
+
+        if (files.headerPicture) {
+            const fileNameHeader = req.user.id + '_header_picture';
+            const destinationHeader = `header-pictures/${fileNameHeader}`;
+            const uploadedHeaderPicture = await uploadFileToStorage(files.headerPicture.PresistentFile, destinationHeader);
+            UserService.updateProfilePictures(req.user.id, uploadedHeaderPicture);
+        }
+
+      // Return the response
+      return res.status(200).json({ status: "success", data: null });
+    } catch (error) {
+        next(new AppError(500, "Could not update user's profile"))
+    }
+  });
+};
+  
+
 
 const requestFriend = async(req,res,next) => {
     // req.query.userId is the id of the user to send friend request to
@@ -189,6 +189,17 @@ const rejectFriend = async (req,res,next) => {
             next(err)
         })
 }
+
+const removeFriend = async(req,res,next) => {
+    UserService.removeFriend(req.user._id, req.query.userId)
+        .then(result => {
+            res.json({ status: "success", data:null });
+        })
+        .catch(err => {
+            next(err)
+        })
+}
+
 
 const login = [
     body('email')
@@ -255,4 +266,4 @@ const authStatus = async(req,res,next) => {
     }
 }
 
-export { getUser, getUserFriends, createUser, deleteUser, updateProfilePicture, login, logout, requestFriend, acceptFriend, rejectFriend, authStatus, searchUsers };
+export { getUser, getUserFriends, createUser, deleteUser, updateProfile, login, logout, requestFriend, acceptFriend, rejectFriend, removeFriend,authStatus, searchUsers };
