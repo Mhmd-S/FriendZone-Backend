@@ -10,6 +10,13 @@ const uploadManager = new Upload.UploadManager(
   })
 );
 
+const fileApi = new Upload.FileApi(
+  new Upload.Configuration({
+    fetchApi: fetch,
+    apiKey: process.env.UPLOADIO_KEY,
+  })
+)
+
 export const uploadImage = async(file, destination = 'profile') => {
   try {
     const buffer = fs.readFileSync(file.filepath);
@@ -47,3 +54,16 @@ export const uploadImage = async(file, destination = 'profile') => {
   }
 };
 
+export const deleteImage = async(filePath) => {
+  try {
+    await fileApi
+      .deleteFile({
+        accountId: "FW25bRD", // This is your account ID.
+        filePath: filePath
+      })
+    return true;
+  } catch(err) {
+    console.log(err);
+    return err;
+  }
+}

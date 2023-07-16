@@ -7,7 +7,7 @@ import { exec } from 'child_process';
 
 export const getUser = async(username) => {
    const user = await User
-                       .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts profilePicture bio')
+                       .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts profilePicture profileHeader bio')
                        .populate('friends', 'username')
                        .populate('pendingRequests', 'username')
                        .populate('pendingFriends', 'username')
@@ -72,14 +72,14 @@ export const deleteUser = async(userId) => {
    }
 }
  
-export const updateProfileImages = async(url, imageDestination = 'profile', userId) => {
-    let resultProfilePicture;
-    let resultHeaderPicture;
+export const updateProfileImages = async(url, imageDestination, userId) => {
+    let result;
+
     if (imageDestination == 'profile') {
-        resultProfilePicture = await User.findByIdAndUpdate(userId, {profilePicture: url }).exec();
+        result = await User.findByIdAndUpdate(userId, { profilePicture: url }).exec();
     }
     if (imageDestination == 'header') {
-        resultHeaderPicture = await User.findByIdAndUpdate(userId, { headerPicture: url }).exec();
+        result = await User.findByIdAndUpdate(userId, { profileHeader: url }).exec();
     }
     return result;
 }

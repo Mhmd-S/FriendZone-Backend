@@ -6,7 +6,7 @@ import passport from 'passport';
 import '../authentication/passport-config';
 import formidable from 'formidable';
 import path from 'path';
-import { uploadImage } from '../uploadio/uploadio_API';
+import { uploadImage, deleteImage } from '../uploadio/uploadio_API';
 
 const getUser = async(req,res,next) => {
     try{
@@ -129,29 +129,34 @@ const updateProfile = async (req, res, next) => {
 
     try {
         if(files?.profilePicture[0]){
+            if (req.user.profilePicture) {
+                const filePath = getParentAndDirectParentFile(req.user.profilePicture, 'profile_images'); 
+                await deleteImage(filePath);
+            }
             const url = await uploadImage(files.profilePicture[0], 'profile');
             const result = await UserService.updateProfileImages(url, 'profile', req.user._id);
-        } else {
-            throw new AppError(400, 'Invalid profile picture');
         }
 
         if (files?.headerPicture[0]) {
+            if (req.user.profilePicture) {
+                const filePath = getParentAndDirectParentFile(req.user.profileHeader, 'profile_headers'); 
+                await deleteImage(filePath);
+            }
             const url = await uploadImage(files.headerPicture[0], 'header');
             const result = await UserService.updateProfileImages(url, 'header', req.user._id);
-        } else {
-            throw new AppError(400, 'Invalid profile header');
+        } 
+
+        if(fields?.bio) {
+            const result = await UserService.updateProfileBio(req.user._id, fields.bio[0]);
         }
 
-      // Return the response
       return res.status(200).json({ status: "success", data: null });
     } catch (error) {
         console.log(error)
         next(new AppError(500, "Could not update user's profile"))
     }
   });
-};
-  
-
+}; 
 
 const requestFriend = async(req,res,next) => {
     // req.query.userId is the id of the user to send friend request to
@@ -262,5 +267,16 @@ const authStatus = async(req,res,next) => {
         res.json({ status: "success", data: { isAuthenticated: true, user: req.user }});
     }
 }
+
+function getParentAndDirectParentFile(url, keyword) {
+    const keywordIndex = url.indexOf(`/${keyword}/`);
+  
+    if (keywordIndex !== -1) {
+      const directParentFile = url.substring(keywordIndex);
+      return directParentFile;
+    } else {
+      return null;
+    }
+  }
 
 export { getUser, getUserFriends, createUser, deleteUser, updateProfile, login, logout, requestFriend, acceptFriend, rejectFriend, removeFriend,authStatus, searchUsers };
