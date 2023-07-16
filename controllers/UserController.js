@@ -5,12 +5,14 @@ import User from '../models/User';
 import passport from 'passport';
 import '../authentication/passport-config';
 import formidable from 'formidable';
-import { uploadFileToStorage } from '../utils/GoogleCloudStorage';
+import path from 'path';
+import { uploadImage } from '../uploadio/uploadio_API';
 
 const getUser = async(req,res,next) => {
     try{
         const username = req.query.username;
         const userInfo = await UserService.getUser(username);
+        console.log(userInfo)
         res.json({ status:"success", data: userInfo });
     } catch(err) {
         next(err);
@@ -83,16 +85,6 @@ const createUser = [
             return true;
         })
         .escape(),
-    body('firstName')
-        .exists().withMessage('firstName field is required')
-        .isAlpha().withMessage('First name needs to contain alphabets only')
-        .isLength({ min: 1, max: 50 }).withMessage('First name is required to have a minimum of 1 character and maximum of 50')
-        .escape(),
-    body('lastName')
-        .exists().withMessage('lastName field is required')
-        .isAlpha().withMessage('Last name needs to contain alphabets only')
-        .isLength({ min: 1, max: 50 }).withMessage('Last name is required to have a minimum of 1 character and maximum of 50')
-        .escape(),
     body('dob')
         .exists().withMessage('dob is required')
         .isDate().withMessage('Date of birth is required')
@@ -124,31 +116,36 @@ const createUser = [
 
   
 const updateProfile = async (req, res, next) => {
-  const form = formidable();
+    const form = formidable({
+        uploadDir: path.resolve(__dirname, '..','uploads'),
+        keepExtensions: true, 
+      });
 
   form.parse(req, async (err, fields, files) => {
     if (err) {
+        console.log(err)
       next(new AppError(500, "Could not update user's profile"))
     }
 
     try {
-        if(files.profilePicture){
-            const fileNameProfile = req.user.id + '_profile_picture';
-            const destinationProfile = `profile-pictures/${fileNameProfile}`;
-            const uploadedProfilePicture = await uploadFileToStorage(files.profilePicture.PresistentFile, destinationProfile);
-            UserService.updateProfilePictures(req.user.id, uploadedProfilePicture);
+        if(files?.profilePicture[0]){
+            const url = await uploadImage(files.profilePicture[0], 'profile');
+            const result = await UserService.updateProfileImages(url, 'profile', req.user._id);
+        } else {
+            throw new AppError(400, 'Invalid profile picture');
         }
 
-        if (files.headerPicture) {
-            const fileNameHeader = req.user.id + '_header_picture';
-            const destinationHeader = `header-pictures/${fileNameHeader}`;
-            const uploadedHeaderPicture = await uploadFileToStorage(files.headerPicture.PresistentFile, destinationHeader);
-            UserService.updateProfilePictures(req.user.id, uploadedHeaderPicture);
+        if (files?.headerPicture[0]) {
+            const url = await uploadImage(files.headerPicture[0], 'header');
+            const result = await UserService.updateProfileImages(url, 'header', req.user._id);
+        } else {
+            throw new AppError(400, 'Invalid profile header');
         }
 
       // Return the response
       return res.status(200).json({ status: "success", data: null });
     } catch (error) {
+        console.log(error)
         next(new AppError(500, "Could not update user's profile"))
     }
   });

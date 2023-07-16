@@ -1,8 +1,9 @@
 import bcrypt from 'bcryptjs';
 import User from '../models/User';
-import uploadImage from '../utils/GoogleCloudStorage';
 import mongoose from 'mongoose';
 import { AppError } from '../utils/errorHandler';
+import fs from 'fs';
+import { exec } from 'child_process';
 
 export const getUser = async(username) => {
    const user = await User
@@ -71,10 +72,17 @@ export const deleteUser = async(userId) => {
    }
 }
  
-export const updateProfileHeader = async(userId, headerURL) => {
-   const result = await User.findByIdAndUpdate(userId, { profileHeader: headerURL });
-   return result;
-};
+export const updateProfileImages = async(url, imageDestination = 'profile', userId) => {
+    let resultProfilePicture;
+    let resultHeaderPicture;
+    if (imageDestination == 'profile') {
+        resultProfilePicture = await User.findByIdAndUpdate(userId, {profilePicture: url }).exec();
+    }
+    if (imageDestination == 'header') {
+        resultHeaderPicture = await User.findByIdAndUpdate(userId, { headerPicture: url }).exec();
+    }
+    return result;
+}
  
 export const updateProfileBio = async(userId, newBio) => {
    const result = User.findByIdAndUpdate(userId, {bio: newBio}).exec();

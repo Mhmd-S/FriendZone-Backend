@@ -15,14 +15,6 @@ const UserSchema = new Schema({
         type:String,
         required: true,
     },
-    firstName:{
-        type: String,
-        required: true,
-    },
-    lastName:{
-        type: String,
-        required: true,
-    },
     friends: {
         type: [Schema.Types.ObjectId],
         ref: "User",
@@ -63,7 +55,7 @@ const UserSchema = new Schema({
     }, 
     profileHeader: {
         type: String,
-        default: null
+        defualt: null
     }, 
     bio: {
         type: String,
