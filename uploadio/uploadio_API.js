@@ -17,7 +17,7 @@ const fileApi = new Upload.FileApi(
   })
 )
 
-export const uploadImage = async(file, destination = 'profile') => {
+export const uploadImage = async(file, destination) => {
   try {
     const buffer = fs.readFileSync(file.filepath);
 
@@ -32,7 +32,7 @@ export const uploadImage = async(file, destination = 'profile') => {
       mime: file.mimetype,
       originalFileName: file.name,
       path: {
-        folderPath: destination === "profile" ? "/profile_images" : "/profile_headers",
+        folderPath: destination,
         fileName: "{UNIQUE_DIGITS_8}{ORIGINAL_FILE_EXT}"
       },
       cancellationToken: {

@@ -114,7 +114,6 @@ const createUser = [
     }
 ];
 
-  
 const updateProfile = async (req, res, next) => {
     const form = formidable({
         uploadDir: path.resolve(__dirname, '..','uploads'),
@@ -133,7 +132,7 @@ const updateProfile = async (req, res, next) => {
                 const filePath = getParentAndDirectParentFile(req.user.profilePicture, 'profile_images'); 
                 await deleteImage(filePath);
             }
-            const url = await uploadImage(files.profilePicture[0], 'profile');
+            const url = await uploadImage(files.profilePicture[0], '/profile_images');
             const result = await UserService.updateProfileImages(url, 'profile', req.user._id);
         }
 
@@ -142,7 +141,7 @@ const updateProfile = async (req, res, next) => {
                 const filePath = getParentAndDirectParentFile(req.user.profileHeader, 'profile_headers'); 
                 await deleteImage(filePath);
             }
-            const url = await uploadImage(files.headerPicture[0], 'header');
+            const url = await uploadImage(files.headerPicture[0], '/profile_headers');
             const result = await UserService.updateProfileImages(url, 'header', req.user._id);
         } 
 
@@ -230,6 +229,7 @@ const login = [
   
         passport.authenticate('user-local', (err, user, info) => {
             if (err) {
+                console.log(err);
               return next(new AppError(500,  {auth: "Couldn't proccess your request. Try again later."}));
             }
         

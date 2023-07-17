@@ -5,7 +5,7 @@ import User from '../models/User';
 
 import { AppError } from '../utils/errorHandler';
 
-export const getPost = async(postId) => {
+export const getPost = async(postId) => { // populate the comments to display the users
     const post = await Post.findById(postId).populate('comments').exec();
     if (post === null) throw new AppError(400,'Invalid :postId parameter');
     return post;
@@ -30,7 +30,7 @@ export const getPosts = async (page, userId) => {
     const friendsIds = user.friends;
     posts = await Post.find({ author: { $in: [...friendsIds, userId] } })
       .populate('author', 'username profilePicture')
-      .sort({ timestamp: 1 })
+      .sort({ timestamp: -1 })
       .skip((page - 1) * 15)
       .limit(15)
       .exec();

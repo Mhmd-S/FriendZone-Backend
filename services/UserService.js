@@ -15,7 +15,7 @@ export const getUser = async(username) => {
                            path:'posts',
                            populate :{
                                path: 'author',
-                               select: 'username'
+                               select: 'username profilePicture'
                            }
                        })
                        .exec();

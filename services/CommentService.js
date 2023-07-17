@@ -14,7 +14,7 @@ export const getComments = async (page, postId) => { // fix this
             path: 'comments',
             populate: {
                 path: 'author',
-                select: 'username'
+                select: 'username profilePicutre'
             }
         })
         .sort({ timestamp: 1 })

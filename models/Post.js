@@ -8,8 +8,8 @@ const PostSchema = new Schema({
         required: true,
     },
     image: {
-        data: Buffer,
-        contentType: String
+        type: String,
+        default: null
     },
     author: {
         type: Schema.Types.ObjectId,

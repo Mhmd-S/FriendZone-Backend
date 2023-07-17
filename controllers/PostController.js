@@ -1,9 +1,9 @@
 import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
-
-import Post from '../models/Post'
-import Comment from '../models/Comment'
+import formidable from 'formidable';
+import path from  'path';
+import { uploadImage } from '../uploadio/uploadio_API';
 
 export const getPost = async(req,res,next) => {
     try {
@@ -43,34 +43,40 @@ export const getPosts = async(req,res,next) => {
         next(err);
     }
 }
-
-export const createPost = [
-    body('content')
-        .exists().withMessage('Content field is required')
-        .trim()
-        .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
-        .escape(),
-    async(req,res,next) => {
-        try{
-            const errors = validationResult(req);
-            if (!errors.isEmpty()) {
-                const errorObject = { [errors.path]: errors.msg };
-                return next(new AppError(400, errorObject));
+export const createPost = async(req,res,next) => {
+    try{
+        const form = formidable({
+            uploadDir: path.resolve(__dirname, '..','uploads'),
+            keepExtensions: true, 
+          });
+        form.parse(req, async (err, fields, files) => {
+            
+            if (err) {
+                console.log(err)
+                return next(new AppError(500, "Could not upload post"))
             }
-
+            
+            let url = null;
+            
+            if (files?.postImage) {
+                console.log('here')
+                url = await uploadImage(files.postImage[0], '/post_images');
+            }
+            
             const postInfo = {
-                content: req.body.content,
+                content: fields.content[0],
+                image: url,
                 author: req.user._id,
             }
 
             const post = await PostService.createPost(postInfo);
-            res.status(200).json({status: "success", data: post});
-        } catch (err) {
-            ;
-            next(err);
-        }
+            return res.status(200).json({status: "success", data: post});
+        });
+    } catch (err) {
+        next(err);
     }
-]
+}
+
 
 export const updatePost = [
     body('content')
