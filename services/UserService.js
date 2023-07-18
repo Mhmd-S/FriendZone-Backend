@@ -38,9 +38,13 @@ export const getUserFriends = async(userId) => {
    return userFriends;
 }
  
-export const searchUsers = async(queryValue, resultLimit) => { // Change this to use page
+export const searchUsers = async(queryValue, resultLimit, page) => { 
    const re = new RegExp(queryValue, "i");
-   const users = await User.find({ username: re }, 'username friends posts').populate('friends').populate('posts').limit(resultLimit).exec();
+   const users = await User
+                        .find({ username: re }, 'username profilePicture friends')
+                        .limit(resultLimit)
+                        .skip((page - 1) * 5``)
+                        .exec();
    return users;
 }
 

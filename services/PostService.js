@@ -30,14 +30,14 @@ export const getPosts = async (page, userId) => {
     const friendsIds = user.friends;
     posts = await Post.find({ author: { $in: [...friendsIds, userId] } })
       .populate('author', 'username profilePicture')
-      .sort({ timestamp: -1 })
+      .sort({ timestamp: 1 })
       .skip((page - 1) * 15)
       .limit(15)
       .exec();
   } else {
     posts = await Post.find()
       .populate('author', 'username profilePicture')
-      .sort({ timestamp: 1, likes: -1 })
+      .sort({ timestamp: -1 })
       .skip((page - 1) * 15)
       .limit(15)
       .exec();

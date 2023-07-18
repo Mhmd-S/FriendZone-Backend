@@ -12,7 +12,6 @@ const getUser = async(req,res,next) => {
     try{
         const username = req.query.username;
         const userInfo = await UserService.getUser(username);
-        console.log(userInfo)
         res.json({ status:"success", data: userInfo });
     } catch(err) {
         next(err);
@@ -33,9 +32,10 @@ const searchUsers = async(req,res,next) => {
     try {
         const queryValue = req.query.keyword;
         const limit = req.query.limit;
+        const page = req.query.page;
         if (!limit || limit > 15 || limit < 1) throw new AppError(400, 'Invalid limit query value. Must be between 1 and 15');
         if (!queryValue) throw new AppError(400, 'Invalid search query');
-        const users = await UserService.searchUsers(queryValue, limit);
+        const users = await UserService.searchUsers(queryValue, limit, page);
         res.json({ status: "success", data: users});
     } catch(err) {
         next(err);
@@ -127,7 +127,7 @@ const updateProfile = async (req, res, next) => {
     }
 
     try {
-        if(files?.profilePicture[0]){
+        if(files?.profilePicture){
             if (req.user.profilePicture) {
                 const filePath = getParentAndDirectParentFile(req.user.profilePicture, 'profile_images'); 
                 await deleteImage(filePath);
@@ -136,7 +136,7 @@ const updateProfile = async (req, res, next) => {
             const result = await UserService.updateProfileImages(url, 'profile', req.user._id);
         }
 
-        if (files?.headerPicture[0]) {
+        if (files?.headerPicture) {
             if (req.user.profilePicture) {
                 const filePath = getParentAndDirectParentFile(req.user.profileHeader, 'profile_headers'); 
                 await deleteImage(filePath);
@@ -145,7 +145,7 @@ const updateProfile = async (req, res, next) => {
             const result = await UserService.updateProfileImages(url, 'header', req.user._id);
         } 
 
-        if(fields?.bio) {
+        if(fields?.bio.trim() !== '') {
             const result = await UserService.updateProfileBio(req.user._id, fields.bio[0]);
         }
 
