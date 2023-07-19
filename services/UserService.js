@@ -38,15 +38,29 @@ export const getUserFriends = async(userId) => {
    return userFriends;
 }
  
-export const searchUsers = async(queryValue, limit, page) => { 
-   const re = new RegExp(queryValue, "i");
-   const users = await User
-                        .find({ username: re }, 'username profilePicture friends')
-                        .limit(limit)
-                        .skip((page - 1) * limit)
-                        .exec();
-   return users;
-}
+export const searchUsers = async (queryValue, limit, page) => {
+    const re = new RegExp(queryValue, "i");
+  
+    const users = await User.aggregate([
+      { $match: { username: re } },
+      {
+        $project: {
+          username: 1,
+          profilePicture: 1,
+          friendsCount: { $size: "$friends" },
+          postsCount: { $size: "$posts" },
+        },
+      },
+      { $sort: { friendsCount: -1, postsCount: -1 } },
+      { $skip: (page - 1) * limit },
+      { $limit: limit*1 },
+    ]);
+    
+    const usersArray = Array.isArray(users) ? users : [users];
+
+    return usersArray;
+  };
+  
 
 export const createUser = async(userObj) => {
    bcrypt.hash(userObj.password, 10, (err, hash) => {

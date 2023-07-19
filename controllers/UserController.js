@@ -35,9 +35,9 @@ const searchUsers = async(req,res,next) => {
         const limit = req.query.limit;
         const page = req.query.page;
 
-        if (!limit || limit > 15 || limit < 1) throw new AppError(400, 'Invalid limit query value. Must be between 1 and 15');
-        if (!page || Number.isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
-        if (!queryValue) throw new AppError(400, 'Invalid search query');
+        if (!limit || limit > 15 || limit < 1) next(new AppError(400, 'Invalid limit query value. Must be between 1 and 15'));
+        if (!page || Number.isInteger(page) || page <= 0) next(new AppError(400, 'Invalid ?page value'));
+        if (!queryValue) throw new AppError(400, next('Invalid search query'));
         
         const users = await UserService.searchUsers(queryValue, limit, page);
         

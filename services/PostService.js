@@ -10,7 +10,7 @@ export const getPost = async(postId) => { // populate the comments to display th
 }
 
 export const searchPosts = async(keyword, limit, page) => {
-    const re = new RegExp("\\b" + keyword + "\\b", "i");
+    const re = new RegExp(keyword, "i");
     const posts = await Post.find({ content: re }) 
                     .populate('author', 'username profilePicture')
                     .sort({ timestamp: 1 })
