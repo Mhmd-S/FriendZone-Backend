@@ -22,6 +22,7 @@ const getUserFriends = async(req,res,next) => {
     try {
         const userId = req.user._id;
         const userFriends = await UserService.getUserFriends(userId);
+        
         res.json({ status: "success", data: userFriends });
     } catch(err) {
         next(err);
@@ -33,9 +34,13 @@ const searchUsers = async(req,res,next) => {
         const queryValue = req.query.keyword;
         const limit = req.query.limit;
         const page = req.query.page;
+
         if (!limit || limit > 15 || limit < 1) throw new AppError(400, 'Invalid limit query value. Must be between 1 and 15');
+        if (!page || Number.isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
         if (!queryValue) throw new AppError(400, 'Invalid search query');
+        
         const users = await UserService.searchUsers(queryValue, limit, page);
+        
         res.json({ status: "success", data: users});
     } catch(err) {
         next(err);
@@ -45,7 +50,6 @@ const searchUsers = async(req,res,next) => {
 const deleteUser = async(req,res,next) => {
     try{
         const result = await UserService.deleteUser(req.params.UserId);
-        // Delete user session!!!
         res.json({ status:"success", data: null})
     } catch(err) {
         next(err);

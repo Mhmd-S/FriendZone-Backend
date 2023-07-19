@@ -20,11 +20,13 @@ export const searchPosts = async(req,res,next) => {
     try {
         const searchQuery = req.query.keywords;
         const page = req.query.page;
+        const limit = req.query.limit;
         
         if (!searchQuery) throw new AppError(400, 'Invalid ?search value');
         if (!page || Number.isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
+        if (!limit || Number.isInteger(limit) || page <= 0 || page > 15) throw new AppError(400, 'Invalid ?limit value');
 
-        const posts = await PostService.searchPosts(searchQuery, page);
+        const posts = await PostService.searchPosts(searchQuery, limit, page);
 
         res.status(200).json({status:"success", data: posts })
     } catch (err) {
@@ -36,9 +38,9 @@ export const getPosts = async(req,res,next) => {
     try {
         const page = req.query.page;
         const userID = req.user?._id ? req.user._id : null;
-        if (!page) throw new AppError(400, 'Invalid ?page value')
-            const posts = await PostService.getPosts(page, userID); 
-            res.status(200).json({status:"success", data: posts});
+        if (!page) throw new AppError(400, 'Invalid ?page value');
+        const posts = await PostService.getPosts(page, userID); 
+        res.status(200).json({status:"success", data: posts});
     } catch (err) {
         next(err);
     }

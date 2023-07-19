@@ -1,6 +1,4 @@
-import mongoose from 'mongoose';
 import Post from '../models/Post';
-import Comment from '../models/Comment';
 import User from '../models/User';
 
 import { AppError } from '../utils/errorHandler';
@@ -11,13 +9,13 @@ export const getPost = async(postId) => { // populate the comments to display th
     return post;
 }
 
-export const searchPosts = async(keyword, page) => {
+export const searchPosts = async(keyword, limit, page) => {
     const re = new RegExp("\\b" + keyword + "\\b", "i");
-    const posts = await Post.find({ content: re }) // Use reges
-                    .populate('author', 'username')
+    const posts = await Post.find({ content: re }) 
+                    .populate('author', 'username profilePicture')
                     .sort({ timestamp: 1 })
-                    .skip((page - 1) * 15)
-                    .limit(15)
+                    .skip((page - 1) * limit)
+                    .limit(limit)
                     .exec();
     console.log(posts)
     return posts;

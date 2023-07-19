@@ -38,12 +38,12 @@ export const getUserFriends = async(userId) => {
    return userFriends;
 }
  
-export const searchUsers = async(queryValue, resultLimit, page) => { 
+export const searchUsers = async(queryValue, limit, page) => { 
    const re = new RegExp(queryValue, "i");
    const users = await User
                         .find({ username: re }, 'username profilePicture friends')
-                        .limit(resultLimit)
-                        .skip((page - 1) * 5``)
+                        .limit(limit)
+                        .skip((page - 1) * limit)
                         .exec();
    return users;
 }
