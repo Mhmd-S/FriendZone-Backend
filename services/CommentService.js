@@ -9,18 +9,15 @@ export const getComment = async(commentId) => {
 }
 
 export const getComments = async (page, postId) => { // fix this
-    const comments =  await Post.findById(postId, 'comments')
-        .populate({
-            path: 'comments',
-            populate: {
-                path: 'author',
-                select: 'username profilePicutre'
-            }
-        })
-        .sort({ timestamp: 1 })
-        .skip((page - 1) * 15)
-        .limit(15)
-        .exec();
+    const comments =  await Comment.find({ postId: postId })
+                        .sort({ createdAt: -1 })
+                        .populate({
+                            path: 'author',
+                            select: 'username profilePicture'
+                        })
+                        .skip((page - 1) * 15)
+                        .limit(15)
+                        .exec();
     return comments;
 }
 

@@ -53,12 +53,13 @@ export const addComment = [
 
             const commentObj = { // Something wrong here
                 author: req.user._id,
-                content: req.body.content,    
+                content: req.body.content,  
+                postId: postId  
             };
 
             const data = await CommentService.addComment(postId, commentObj)
 
-            res.json({ status: "success", data: data});
+            res.json({ status: "success", data: null});
             
         } catch(err) {
             next(err);

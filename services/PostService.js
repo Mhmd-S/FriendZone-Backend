@@ -4,7 +4,18 @@ import User from '../models/User';
 import { AppError } from '../utils/errorHandler';
 
 export const getPost = async(postId) => { // populate the comments to display the users
-    const post = await Post.findById(postId).populate('comments').exec();
+    const post = await Post.findById(postId)
+                    .sort({ createdAt: -1 })
+                    .populate({
+                        path: 'comments',
+                        populate: {
+                            path: 'author',
+                            select: 'username profilePicture'
+                        }
+                    })
+                    .skip((page - 1) * 15)
+                    .limit(15)
+                    .exec();
     if (post === null) throw new AppError(400,'Invalid :postId parameter');
     return post;
 }
@@ -13,11 +24,11 @@ export const searchPosts = async(keyword, limit, page) => {
     const re = new RegExp(keyword, "i");
     const posts = await Post.find({ content: re }) 
                     .populate('author', 'username profilePicture')
-                    .sort({ timestamp: 1 })
+                    .sort({ createdAt: -1 })
                     .skip((page - 1) * limit)
                     .limit(limit)
                     .exec();
-    console.log(posts)
+
     return posts;
 }
 
@@ -27,15 +38,15 @@ export const getPosts = async (page, userId) => {
     const user = await User.findById(userId).exec();
     const friendsIds = user.friends;
     posts = await Post.find({ author: { $in: [...friendsIds, userId] } })
+        .sort({ createdAt: -1 })
       .populate('author', 'username profilePicture')
-      .sort({ timestamp: 1 })
       .skip((page - 1) * 15)
       .limit(15)
       .exec();
   } else {
     posts = await Post.find()
+    .sort({ createdAt: -1 })
       .populate('author', 'username profilePicture')
-      .sort({ timestamp: -1 })
       .skip((page - 1) * 15)
       .limit(15)
       .exec();

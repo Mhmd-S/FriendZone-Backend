@@ -3,7 +3,6 @@ import User from '../models/User';
 import mongoose from 'mongoose';
 import { AppError } from '../utils/errorHandler';
 import fs from 'fs';
-import { exec } from 'child_process';
 
 export const getUser = async(username) => {
    const user = await User
