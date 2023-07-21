@@ -45,39 +45,58 @@ export const getPosts = async(req,res,next) => {
         next(err);
     }
 }
-export const createPost = async(req,res,next) => {
-    try{
-        const form = formidable({
-            uploadDir: path.resolve(__dirname, '..','uploads'),
-            keepExtensions: true, 
-          });
-        form.parse(req, async (err, fields, files) => {
-            
-            if (err) {
-                console.log(err)
-                return next(new AppError(500, "Could not upload post"))
-            }
-            
-            let url = null;
-            
-            if (files?.postImage) {
-                console.log('here')
-                url = await uploadImage(files.postImage[0], '/post_images');
-            }
-            
-            const postInfo = {
-                content: fields.content[0],
-                image: url,
-                author: req.user._id,
-            }
 
-            const post = await PostService.createPost(postInfo);
-            return res.status(200).json({status: "success", data: post});
-        });
+export const createPost = [
+  body('content')
+    .exists().withMessage('Content field is required!')
+    .trim()
+    .isLength({ min: 1, max: 500 }).withMessage('Content size should be at least 1 character and a maximum of 500')
+    .escape(),
+  async (req, res, next) => {
+    try {
+      const form = formidable({
+        uploadDir: path.resolve(__dirname, '..', 'uploads'),
+        keepExtensions: true,
+      });
+      form.parse(req, async (err, fields, files) => {
+        if (err) {
+          console.log(err)
+          return next(new AppError(500, "Could not upload post"))
+        }
+
+        // Validate the postImage field
+        if (!files?.postImage) {
+          return next(new AppError(400, 'Image file is required'));
+        }
+
+        const imageFile = files.postImage;
+        if (!Array.isArray(imageFile) || imageFile.length !== 1) {
+          return next(new AppError(400, 'Only one image file allowed'));
+        }
+
+        // Check if the uploaded file is an image (you can add more checks here)
+        const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+        if (!acceptedFileTypes.includes(imageFile.type)) {
+          return next(new AppError(400, 'Only image files are allowed'));
+        }
+
+        const url = await uploadImage(imageFile[0], '/post_images');
+
+        const postInfo = {
+          content: fields.content[0],
+          image: url,
+          author: req.user._id,
+        }
+
+        const post = await PostService.createPost(postInfo);
+        return res.status(200).json({ status: "success", data: post });
+      });
     } catch (err) {
-        next(err);
+      next(err);
     }
-}
+  }
+];
+
 
 
 export const updatePost = [

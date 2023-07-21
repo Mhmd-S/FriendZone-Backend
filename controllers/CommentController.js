@@ -41,7 +41,7 @@ export const addComment = [
     body('content')
     .exists().withMessage('Content field is required')
     .trim()
-    .isLength({ min:1, max: 1250 }).withMessage('Content size should be atleast 1 character and a maximum of 1250')
+    .isLength({ min:1, max: 400 }).withMessage('Content size should be atleast 1 character and a maximum of 400')
     .escape(),
     async(req,res,next) => {
         try{

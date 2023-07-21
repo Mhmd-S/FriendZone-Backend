@@ -22,12 +22,12 @@ router.put('/like/:postId', checkAuth, PostController.likePost);
 // Unlike a post 
 router.delete('/unlike/:postId', checkAuth, PostController.unLikePost);
 
-// To be added to frontend
-// Update a post
-router.put('/:postId', checkAuth, PostController.updatePost);
+// // To be added to frontend
+// // Update a post
+// router.put('/:postId', checkAuth, PostController.updatePost);
 
-// Delete a post
-router.delete('/:postId', checkAuth, PostController.deletePost );
+// // Delete a post
+// router.delete('/:postId', checkAuth, PostController.deletePost );
 
 // Comment router. Will move it later
 
