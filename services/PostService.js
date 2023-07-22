@@ -5,16 +5,10 @@ import { AppError } from '../utils/errorHandler';
 
 export const getPost = async(postId) => { // populate the comments to display the users
     const post = await Post.findById(postId)
-                    .sort({ createdAt: -1 })
                     .populate({
-                        path: 'comments',
-                        populate: {
-                            path: 'author',
-                            select: 'username profilePicture'
-                        }
+                        path: 'author',
+                        select: 'username profilePicture',
                     })
-                    .skip((page - 1) * 15)
-                    .limit(15)
                     .exec();
     if (post === null) throw new AppError(400,'Invalid :postId parameter');
     return post;
@@ -82,11 +76,9 @@ export const updatePost = async(postId,newPostObj) => {
     }
 }
 
-export const deletePost = async(postId) => { // Does it remove the post from the user?
-    const post = await Post.findById(postId).exec();
-    if (post === null) throw new AppError(400,' Invalid :postId parameter');
-
+export const deletePost = async(userId, postId) => { // Does it remove the post from the user?
     const result = await Post.findByIdAndRemove(postId);
+    const deleteFromUser = await User.findByIdAndUpdate(userId, { $pull : { post: postId }}).exec();
     return result;
 }
 

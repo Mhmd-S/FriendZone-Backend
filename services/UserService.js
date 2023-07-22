@@ -5,19 +5,23 @@ import { AppError } from '../utils/errorHandler';
 import fs from 'fs';
 
 export const getUser = async(username) => {
-   const user = await User
-                       .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts profilePicture profileHeader bio')
-                       .populate('friends', 'username')
-                       .populate('pendingRequests', 'username')
-                       .populate('pendingFriends', 'username')
-                       .populate({
-                           path:'posts',
-                           populate :{
-                               path: 'author',
-                               select: 'username profilePicture'
-                           }
-                       })
-                       .exec();
+    const user = await User
+    .findOne({ username: username }, 'username friends pendingRequests pendingFriends posts profilePicture profileHeader bio')
+    .populate('friends', 'username')
+    .populate('pendingRequests', 'username')
+    .populate('pendingFriends', 'username profilePicture')
+    .populate({
+        path: 'posts',
+        populate: {
+            path: 'author',
+            select: 'username profilePicture'
+        },
+        options: {
+            sort: { createdAt: -1 } 
+        }
+    })
+    .exec();
+
    if (user === null) {
        throw new AppError(404, {error: "User not found"});
    }
@@ -168,7 +172,7 @@ export const rejectFriend = async(userId, friendId) => { // Continue this
    // Remove the request from the user who initiated the request
    const removeFromPendingRequest = await User.findByIdAndUpdate(friendId, {$pull: { pendingRequests: userId }}).exec();
    
-   return {addToFriendListToUser, addToFriendListToFriend};
+   return {removeFromPendingFriend, removeFromPendingRequest};
 }
  
 export const removeFriend = async(userId, friendId) => {

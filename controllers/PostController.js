@@ -64,24 +64,25 @@ export const createPost = [
           return next(new AppError(500, "Could not upload post"))
         }
 
-        // Validate the postImage field
-        if (!files?.postImage) {
-          return next(new AppError(400, 'Image file is required'));
+        let url = '';
+        
+        // Validate the postImage field if an image is available
+        if (files?.postImage) {
+            const imageFile = files.postImage;
+            if (!Array.isArray(imageFile) || imageFile.length !== 1) {
+              return next(new AppError(400, 'Only one image file allowed'));
+            }
+
+            // Check if the uploaded file is an image
+            const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+            console.log(imageFile)
+            if (!acceptedFileTypes.includes(imageFile[0].mimetype)) {
+              return next(new AppError(400, 'Only image files are allowed'));
+            }
+
+            url = await uploadImage(imageFile[0], '/post_images');
         }
-
-        const imageFile = files.postImage;
-        if (!Array.isArray(imageFile) || imageFile.length !== 1) {
-          return next(new AppError(400, 'Only one image file allowed'));
-        }
-
-        // Check if the uploaded file is an image (you can add more checks here)
-        const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-        if (!acceptedFileTypes.includes(imageFile.type)) {
-          return next(new AppError(400, 'Only image files are allowed'));
-        }
-
-        const url = await uploadImage(imageFile[0], '/post_images');
-
+        
         const postInfo = {
           content: fields.content[0],
           image: url,
@@ -128,18 +129,29 @@ export const updatePost = [
     }
 ]
 
-export const deletePost = [
-    async(req,res,next) => {
+export const deletePost = async(req,res,next) => {
         try {
+            console.log(123)
             const postId = req.params.postId;
-            if (!postId) throw new AppError(400,'Invalid :postId parameter');
-            await PostService.deletePost(postId);
+            
+            // Verify user's owner of post
+            const post = await PostService.getPost(postId);
+
+            if (!post) {
+                next(new AppError(400, 'Invalid :postId paramter'))
+            }
+
+            if (post.author.username !== req.user.username) {
+                next(new AppError(400,'Unauthorized action'));
+            }
+
+            await PostService.deletePost(req.user._id, postId);
             res.status(200).json({ status:"success", data: null})
         }catch (err) {
             next(err);
         }
     }
-]
+
 
 export const likePost = async(req,res,next) => {
     try{
@@ -168,3 +180,4 @@ export const unLikePost = async(req,res,next) => {
         next(err);
     }
 }
+

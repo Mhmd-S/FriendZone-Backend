@@ -5,6 +5,8 @@ import Post from "../models/Post";
 
 let router = express.Router();
 
+// Delete a post
+
 router.get('/search', PostController.searchPosts);
 
 // Get  a certain amount of posts
@@ -25,9 +27,7 @@ router.delete('/unlike/:postId', checkAuth, PostController.unLikePost);
 // // To be added to frontend
 // // Update a post
 // router.put('/:postId', checkAuth, PostController.updatePost);
-
-// // Delete a post
-// router.delete('/:postId', checkAuth, PostController.deletePost );
+router.delete('/:postId', checkAuth, PostController.deletePost );
 
 // Comment router. Will move it later
 
