@@ -40,7 +40,7 @@ export const addComment = async(postId, commentObj) => {
     return result;
 }
 
-export const deleteComment = async(commentId) => { // Does it remove comment from user?
+export const deleteComment = async(commentId) => { 
     const deleteCommentRes = Comment.findByIdAndDelete(commentId).exec();
     const deleteCommentFromPostRes = Post.findOneAndUpdate({ comments: { $in: [commentId]} }, { $pull : { comments : commentId }}).exec();
     const deleteFromUser = User.findOneAndUpdate({ comments: { $in: [commentId] }}, { $pull : { comments: commentId }}).exec();

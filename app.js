@@ -12,6 +12,8 @@ import { Server } from 'socket.io';
 import UserRouter from './routes/UserRouter';
 import PostRouter from './routes/PostRouter';     
 import CommentRouter from './routes/CommentRouter'; 
+import ChatRouter from './routes/ChatRouter';
+
 import { createServer } from 'http';
 
 const app = express();
@@ -64,6 +66,7 @@ app.use(passport.session());
 app.use('/user', UserRouter);
 app.use('/post', PostRouter);
 app.use('/comment', CommentRouter);
+app.use('/chat', ChatRouter);
 
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {

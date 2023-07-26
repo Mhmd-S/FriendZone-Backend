@@ -4,10 +4,12 @@ import User from '../models/User';
 import * as ChatService from '../services/ChatService';
 import mongoose from 'mongoose';
 
+
 export const getChat = async(req,res,next) => {
     try{
         const userId = req.user._id;
-        const chatId = req.params.chatId;
+        const recipientId = req.query.recipientId;
+        const page = req.query.page;
 
         if (!chatId)  next(new AppError(400, "Invalid :chatId parameter"))
 
@@ -17,7 +19,7 @@ export const getChat = async(req,res,next) => {
             next(new AppError(401, "Unauthorized to view chat!"));
         }
 
-        const chat = await ChatService.getChat(chatId);
+        const chat = await ChatService.getChat(recipientId, req.user._id, page);
 
         res.json({ status: "success", data: chat });
     } catch (err) {
@@ -28,7 +30,7 @@ export const getChat = async(req,res,next) => {
 export const getChats = async(req,res,next) => {
     try {
         const userId = req.user._id;
-        const page = req.user.page;
+        const page = req.query.page;
 
         const chats = await ChatService.getChats(userId, page);
 

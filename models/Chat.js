@@ -14,10 +14,6 @@ const chatSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Message',
     },
-    timestamp: {
-        type: Date,
-        default: Date.now,
-    },
-});
+}, { timestapms: true});
 
-const Chat = mongoose.model('Chat', chatSchema);
+export const Chat = mongoose.model('Chat', chatSchema);
