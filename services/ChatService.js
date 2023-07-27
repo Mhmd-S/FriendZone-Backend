@@ -21,22 +21,24 @@ export const getChat = async(recipientId, userId,page) => {
             select: 'username profilePicture'
         }
     }).exec();
+
     return result;
 }
 
 export const getChats = async(userID, page) => {
+    console.log(Chat);
     const result = await Chat.find({ participants: { $in: [userID] } })
         .populate('participants', 'username profilePicture')
         .populate('lastMessage', 'content createdAt')
         .sort({ updatedAt: -1 })
-        .skip((page - 1) * 10)
-        .limit(10)
+        .skip((page - 1) * 20)
+        .limit(20)
         .exec();
 
     return result;
 }
 
- export const createChat = async(participants) => {
+ export const createChat = async(participants, message) => {
     const chat = new Chat({ participants: participants });
     const result = await chat.save();
     return result;

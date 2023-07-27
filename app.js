@@ -8,6 +8,9 @@ import { AppError, errorHandlers } from './utils/errorHandler';
 import  MongoStore from 'connect-mongo';
 import { Server } from 'socket.io';
 
+//Import Controller for the Chat to be used in sockets
+import * as ChatController from './controllers/ChatController';
+
 // Import routers
 import UserRouter from './routes/UserRouter';
 import PostRouter from './routes/PostRouter';     
@@ -28,7 +31,7 @@ async function main() {
 }
 
 main().catch(err => console.error("Cannot connect to database"));
-
+// FIx the session
 // Configs for the global middleware
 const corsOption = { // Change later. // Config for the CORS
     'origin': 'http://127.0.0.1:5173',
@@ -54,8 +57,8 @@ const sessionMiddleware = session({
         client: mongoose.connection.getClient()
     }),
     cookie: {
-        maxAge: 30 * 24 * 60 * 60 // 30 days
-    }  
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+    },
 })
 
 app.use(sessionMiddleware);
@@ -70,7 +73,6 @@ app.use('/chat', ChatRouter);
 
 // Catching 404 and forwarding it to error handler
 app.use((req,res,next) => {
-    console.log()
     next(new AppError(404, 'Not Found'));
 });
 
@@ -97,16 +99,17 @@ const io = new Server(httpServer, {
         // whether to skip middlewares upon successful recovery
         skipMiddlewares: true,
     },
-    cookie: true,
 });
 
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
 io.use(wrap(sessionMiddleware));
+io.use(wrap(passport.initialize()));
+io.use(wrap(passport.session()));
 
 io.use((socket, next) => {
-    const session = socket.request.session;
-    if (session && session.authenticated) {
+    console.log(socket.request.user);
+    if (socket.request.user) {
       next();
     } else {
       next(new Error("unauthorized"));
@@ -120,14 +123,18 @@ io.on('connection', (socket) => {
   console.log('A user connected');
 
   // Assume you have the user ID available in socket.request.session.userId
-  const userId = socket.request.session.userId;
+  const userId = null;
 
   // Store the association between user ID and socket ID in the map
   userSocketMap.set(userId, socket.id);
 
   socket.join(userId);
 
-  socket.on('message', (data) => {
+  // socket.onAny((data)=>{
+  //   console.log(data);
+  // })
+
+  socket.on('message', async(data) => {
     const recipientId = data.recipientId;
 
     // Get the recipient's socket ID from the map
@@ -142,6 +149,21 @@ io.on('connection', (socket) => {
       // For example, you can store the message in the database and send it later when the recipient comes online
       console.log(`Recipient ${recipientId} is offline or not found`);
     }
+
+    // Save data to the database
+    try{
+    if(data.newChat) {
+      const result = await ChatController.createChat([userId, data.recipientId], data.message);
+      const chatAddMessageResult = await ChatController.putChat(userId,result._id, message);
+      console.log(result)
+    } else {
+      const result = await ChatController.putChat(userId, data.chatId, data.message);
+      console.log(result);  
+    }
+  } catch(err) {
+    console.log(err);
+  }
+
   });
 
   socket.on('disconnect', () => {
