@@ -73,7 +73,8 @@ const configurePassport = () => {
 
   passport.deserializeUser(async (id, done) => {
     try {
-        const user = await User.findById(id);
+        const userObj = await User.findById(id);
+        const user =  {_id: userObj._id, username: userObj.username};
         if (user) {
             return done(null, user);
         }

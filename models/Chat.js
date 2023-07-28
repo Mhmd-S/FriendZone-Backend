@@ -11,10 +11,12 @@ const chatSchema = new Schema({
     messages: {
         type: [Schema.Types.ObjectId],
         ref: 'Message',
+        default: [],
     },
     lastMessage: {
         type: Schema.Types.ObjectId,
         ref: 'Message',
+        default: null,
     },
 }, { timestapms: true});
 

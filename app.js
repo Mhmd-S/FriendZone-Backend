@@ -7,6 +7,7 @@ import configurePassport from './authentication/passport-config';
 import { AppError, errorHandlers } from './utils/errorHandler';
 import  MongoStore from 'connect-mongo';
 import { Server } from 'socket.io';
+const fs = require('fs');
 
 //Import Controller for the Chat to be used in sockets
 import * as ChatController from './controllers/ChatController';
@@ -47,7 +48,7 @@ const passport = configurePassport();
 // Global middleware
 app.use(cors(corsOption));
 app.use(express.json());
-app.use(express.urlencoded({ extended: true}));
+app.use(express.urlencoded({ extended: true }));
 
 const sessionMiddleware = session({ 
     secret: process.env.session_secret, 
@@ -90,17 +91,15 @@ app.use((err,req,res,next) => {
 const io = new Server(httpServer, {
     cors: {
         origin: "http://127.0.0.1:5173",
-        methods: ["GET", "POST"],
         credentials: true
     },
     connectionStateRecovery: {
         // the backup duration of the sessions and the packets
         maxDisconnectionDuration: 2 * 60 * 1000,
-        // whether to skip middlewares upon successful recovery
-        skipMiddlewares: true,
     },
 });
 
+// convert a connect middleware to a Socket.IO middleware
 const wrap = middleware => (socket, next) => middleware(socket.request, {}, next);
 
 io.use(wrap(sessionMiddleware));
@@ -123,7 +122,7 @@ io.on('connection', (socket) => {
   console.log('A user connected');
 
   // Assume you have the user ID available in socket.request.session.userId
-  const userId = null;
+  const userId = socket.request.user._id;
 
   // Store the association between user ID and socket ID in the map
   userSocketMap.set(userId, socket.id);
@@ -149,16 +148,14 @@ io.on('connection', (socket) => {
       // For example, you can store the message in the database and send it later when the recipient comes online
       console.log(`Recipient ${recipientId} is offline or not found`);
     }
-
+    console.log(data);
     // Save data to the database
     try{
     if(data.newChat) {
-      const result = await ChatController.createChat([userId, data.recipientId], data.message);
-      const chatAddMessageResult = await ChatController.putChat(userId,result._id, message);
-      console.log(result)
+      const result = await ChatController.createChat([userId, data.recipientId]);
+      const chatAddMessageResult = await ChatController.putChat(userId,result._id, data.message);
     } else {
       const result = await ChatController.putChat(userId, data.chatId, data.message);
-      console.log(result);  
     }
   } catch(err) {
     console.log(err);

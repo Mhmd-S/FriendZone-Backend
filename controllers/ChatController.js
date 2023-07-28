@@ -54,27 +54,39 @@ export const getChats = async(req,res,next) => {
 
 // The code below is used by sockets only
 
-export const createChat = async(participants, message) => {
+export const createChat = async(participants) => {
     try {
-        const chat = await ChatService.createChat(participants, message);
+
+        if (!participants) throw new AppError(400, "Invalid :participants parameter");
+
+        if (!Array.isArray(participants)) throw new AppError(400, "Invalid :participants parameter");
+
+        if (participants.length !== 2) throw new AppError(400, "Invalid :participants parameter");
+
+        if (!mongoose.Types.ObjectId.isValid(participants[0]) || !mongoose.Types.ObjectId.isValid(participants[1])) throw new AppError(400, "Invalid :participants parameter");
+        
+        // check if participants are valid users
+        if (!await User.exists({ _id: participants[0] }) || !await User.exists({ _id: participants[1] })) throw new AppError(404, "User not found!");
+
+        const chat = await ChatService.createChat(participants);
         return chat;
     } catch (err) {
-        next(err);
+        console.log(err);
     }
 }
 
 
 export const putChat = async(userId, chatId, message) => {
     try {
-        if (!chatId) next(new AppError(400, "Invalid :chatId parameter"));
+        if (!chatId) throw new AppError(400, "Invalid :chatId parameter");
         
         const chatPartcipants = await ChatService.getParticipants(chatId);
         
-        if (chatPartcipants.indexOf(userId) === -1) next(new AppError(401, "Unauthorized to access chat!"));
+        if (chatPartcipants.indexOf(userId) === -1) throw new AppError(401, "Unauthorized to access chat!");
         
         const chat = await ChatService.getChat(chatId);
         
-        if (!chat) next(new AppError(404, "Chat not found!"));
+        if (!chat) throw new AppError(404, "Chat not found!");
 
         const messageObj = {
             senderId: userId,
@@ -82,9 +94,9 @@ export const putChat = async(userId, chatId, message) => {
             content: message
         }
 
-        const message = await ChatService.putChat(chatId, messageObj);
-        return chat;
+        const charResult = await ChatService.putChat(chatId, messageObj);
+        return charResult;
     } catch (err) {
-        next(err);
+        console.log(err);
     }
 }
