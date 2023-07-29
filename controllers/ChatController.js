@@ -81,8 +81,8 @@ export const putChat = async(userId, chatId, message) => {
         if (!chatId) throw new AppError(400, "Invalid :chatId parameter");
         
         const chatPartcipants = await ChatService.getParticipants(chatId);
-        
-        if (chatPartcipants.indexOf(userId) === -1) throw new AppError(401, "Unauthorized to access chat!");
+
+        if (chatPartcipants.participants.indexOf(userId) === -1) throw new AppError(401, "Unauthorized to access chat!");
         
         const chat = await ChatService.getChat(chatId);
         
@@ -90,7 +90,7 @@ export const putChat = async(userId, chatId, message) => {
 
         const messageObj = {
             senderId: userId,
-            recipientId: chatPartcipants[0] === userId ? chatPartcipants[1] : chatPartcipants[0],
+            recipientId: chatPartcipants.participants[0] === userId ? chatPartcipants.participants[0] : chatPartcipants.participants[1],
             content: message
         }
 

@@ -14,10 +14,6 @@ export const getChat = async(recipientId, userId,page) => {
             sort: { createdAt: -1 },
             limit: 50,
             skip: (page-1) * 50
-        },
-        populate: {
-            path: 'author',
-            select: 'username profilePicture'
         }
     }).exec();
 
@@ -55,6 +51,6 @@ export const putChat = async(chatId, messageObj) => {
     const message = new Message({...messageObj});
     const messageResult = await message.save();
     
-    const chatResult = await Chat.findByIdandUpdate(chatId, { lastMessage: messageResult._id, $push: { messages: messageResult._id } }).exec();
+    const chatResult = await Chat.findByIdAndUpdate(chatId, { lastMessage: messageResult._id, $push: { messages: messageResult._id } }).exec();
     return chatResult;
 }

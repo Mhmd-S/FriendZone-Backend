@@ -18,7 +18,6 @@ export const getComments = async (page, postId) => { // fix this
                         .skip((page - 1) * 15)
                         .limit(15)
                         .exec();
-                        console.log(comments)
     return comments;
 }
 

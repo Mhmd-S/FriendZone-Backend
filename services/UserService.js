@@ -80,7 +80,6 @@ export const createUser = async(userObj) => {
                return result;
            })
            .catch((err)=> {
-               console.log(err);
                throw new AppError(500, {error:"User couldn't be created"});
            });
    } );
@@ -147,7 +146,6 @@ export const acceptFriend = async(userId, friendId) => {
    // userId is the user who is going to accept the request
    // Delete the pending friend request from the user
    const removeFromPending = await User.findByIdAndUpdate(userId, {$pull: { pendingFriends: friendId }}).exec();
-   console.log(removeFromPending);
    // Throw error if couldn't delete the friend who made request from the pending list of the user
    if(!removeFromPending){
        return new AppError(400, {error:"Couldn't accept friend request. Request may not exists."})

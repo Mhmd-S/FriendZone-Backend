@@ -107,7 +107,6 @@ io.use(wrap(passport.initialize()));
 io.use(wrap(passport.session()));
 
 io.use((socket, next) => {
-    console.log(socket.request.user);
     if (socket.request.user) {
       next();
     } else {
@@ -115,45 +114,50 @@ io.use((socket, next) => {
     }
   });
 
-// Create a Map to store user IDs and their corresponding socket IDs
+// To save users and their socket IDs
 const userSocketMap = new Map();
 
 io.on('connection', (socket) => {
   console.log('A user connected');
 
-  // Assume you have the user ID available in socket.request.session.userId
-  const userId = socket.request.user._id;
+  const userId = socket.request.user._id.toString();
 
   // Store the association between user ID and socket ID in the map
   userSocketMap.set(userId, socket.id);
 
   socket.join(userId);
 
-  // socket.onAny((data)=>{
-  //   console.log(data);
-  // })
+  socket.on('send-message', async(data) => {
 
-  socket.on('message', async(data) => {
     const recipientId = data.recipientId;
 
     // Get the recipient's socket ID from the map
     const recipientSocketId = userSocketMap.get(recipientId);
-
+    console.log(recipientSocketId)
+    console.log(io.sockets.sockets.has(recipientSocketId))
     // Check if the recipient is online (has a socket connection)
     if (recipientSocketId && io.sockets.sockets.has(recipientSocketId)) {
       // Emit the message only to the intended recipient's socket
-      io.to(recipientSocketId).emit('message', data);
+      data.sender = {
+        userId: userId,
+        username: socket.request.user.username,
+        profilePicture: socket.request.user.profilePicture
+      }
+      data.timestamp = Date.now();
+      io.to(recipientSocketId).emit('receive-message', data);
     } else {
       // Handle the case when the recipient is offline or not found
       // For example, you can store the message in the database and send it later when the recipient comes online
       console.log(`Recipient ${recipientId} is offline or not found`);
     }
-    console.log(data);
     // Save data to the database
     try{
-    if(data.newChat) {
+    if(data.chatId === null) {
       const result = await ChatController.createChat([userId, data.recipientId]);
       const chatAddMessageResult = await ChatController.putChat(userId,result._id, data.message);
+
+      // Send the chatId back to the client
+      socket.emit('chatId', result._id);
     } else {
       const result = await ChatController.putChat(userId, data.chatId, data.message);
     }
