@@ -129,12 +129,11 @@ io.on('connection', (socket) => {
 
   socket.on('send-message', async(data) => {
 
-    const recipientId = data.recipientId;
+    const recipientId = data.recipient._id;
 
     // Get the recipient's socket ID from the map
     const recipientSocketId = userSocketMap.get(recipientId);
-    console.log(recipientSocketId)
-    console.log(io.sockets.sockets.has(recipientSocketId))
+
     // Check if the recipient is online (has a socket connection)
     if (recipientSocketId && io.sockets.sockets.has(recipientSocketId)) {
       // Emit the message only to the intended recipient's socket

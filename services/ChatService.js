@@ -8,22 +8,23 @@ export const getParticipants = async(chatId) => {
 }
 
 export const getChat = async(recipientId, userId,page) => {
-    const result = await Chat.find({ participants: { $in: [userId, recipientId ] }}).populate({
+    const result = await Chat.findOne({ participants: { $in: [userId, recipientId ] }}).populate({
         path: 'messages',
+        select: 'senderId content createdAt',
         options: {
             sort: { createdAt: -1 },
             limit: 50,
             skip: (page-1) * 50
-        }
+        },
     }).exec();
 
     return result;
 }
 
 export const getChats = async(userID, page) => {
-    const result = await Chat.find({ participants: { $in: [userID] } })
+    const result = await Chat.find({ participants: { $in: [userID] } }, 'participants lastMessage')
         .populate('participants', 'username profilePicture')
-        .populate('lastMessage', 'content createdAt')
+        .populate('lastMessage', 'content updatedAt')
         .sort({ updatedAt: -1 })
         .skip((page - 1) * 20)
         .limit(20)
