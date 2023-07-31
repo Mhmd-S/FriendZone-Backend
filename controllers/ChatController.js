@@ -7,19 +7,11 @@ import mongoose from 'mongoose';
 
 export const getChat = async(req,res,next) => {
     try{
-        const userId = req.user._id;
+
         const recipientId = req.query.recipientId;
         const page = req.query.page;
  
         if (!page) next(new AppError(400, "Invalid :page parameter"));
-
-        if (!mongoose.Types.ObjectId.isValid(userId)) {
-            next(new AppError(400, "Invalid :userId parameter"));
-        }
-
-        if (!mongoose.Types.ObjectId.isValid(recipientId)) {
-            next(new AppError(400, "Invalid :recipientId parameter"));
-        }
 
         if (page < 1) next(new AppError(400, "Invalid :page parameter"));
 
@@ -73,29 +65,31 @@ export const createChat = async(participants) => {
     } catch (err) {
         console.log(err);
     }
-}
-
+} 
 
 export const putChat = async(userId, chatId, message) => {
     try {
+    
         if (!chatId) throw new AppError(400, "Invalid :chatId parameter");
         
         const chatPartcipants = await ChatService.getParticipants(chatId);
 
         if (chatPartcipants.participants.indexOf(userId) === -1) throw new AppError(401, "Unauthorized to access chat!");
         
-        const chat = await ChatService.getChat(chatId);
-        
+        const recipient = chatPartcipants.participants[0] === userId ? chatPartcipants.participants[0] : chatPartcipants.participants[1];
+        const chat = await ChatService.getChat(recipient, userId, 1);
+
         if (!chat) throw new AppError(404, "Chat not found!");
 
         const messageObj = {
             senderId: userId,
-            recipientId: chatPartcipants.participants[0] === userId ? chatPartcipants.participants[0] : chatPartcipants.participants[1],
+            recipientId: recipient,
             content: message
-        }
+        };
 
         const charResult = await ChatService.putChat(chatId, messageObj);
         return charResult;
+    
     } catch (err) {
         console.log(err);
     }
