@@ -161,8 +161,8 @@ io.on('connection', (socket) => {
       const result = await ChatController.putChat(userId, data.chatId, data.message);
     }
   } catch(err) {
-    console.log(err);
-  }
+    socket.emit('error', 'Coukd not save message to database');
+    }
 
   });
 

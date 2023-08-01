@@ -30,7 +30,7 @@ export const getComments = async(req,res,next) => {
         if (!page || Number.isInteger(page) || page <= 0) throw new AppError(400, 'Invalid ?page value');
 
         const comments = await CommentService.getComments(page, postId); 
-        console.log(comments);
+
         res.status(200).json({status:"success", data: comments});
     } catch (err) {
         next(err);
@@ -80,7 +80,7 @@ export const deleteComment = async(req,res,next) => {
         if (!comment) {
             throw new AppError(400, "Invalid :commentId paramter")
         }
-        console.log(comment.author , req.user._id)
+
         if (comment.author.toString() !== req.user._id.toString()) {
             throw new AppError(401, "Unauthorized to delete comment!")
         }
