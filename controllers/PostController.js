@@ -60,8 +60,8 @@ export const createPost = [
       });
       form.parse(req, async (err, fields, files) => {
         if (err) {
-          console.log(err)
-          return next(new AppError(500, "Could not upload post"))
+            next(new AppError(500, "Could not upload post"))
+            return;
         }
 
         let url = '';
@@ -70,14 +70,16 @@ export const createPost = [
         if (files?.postImage) {
             const imageFile = files.postImage;
             if (!Array.isArray(imageFile) || imageFile.length !== 1) {
-              return next(new AppError(400, 'Only one image file allowed'));
+                next(new AppError(400, 'Only one image file allowed'));
+                return
             }
 
             // Check if the uploaded file is an image
             const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
             console.log(imageFile)
             if (!acceptedFileTypes.includes(imageFile[0].mimetype)) {
-              return next(new AppError(400, 'Only image files are allowed'));
+                next(new AppError(400, 'Only image files are allowed'));
+                return;
             }
 
             url = await uploadImage(imageFile[0], '/post_images');

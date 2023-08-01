@@ -36,7 +36,7 @@ export const addComment = async(postId, commentObj) => {
     const commentResult = await comment.save();
     const result = await Post.findByIdAndUpdate(postId, { $push: { comments: commentResult._id  } }).exec();
     const resultUser = await User.findByIdAndUpdate(commentObj.author, { $push: { commentedPosts : commentResult._id }}).exec();
-    return result;
+    return commentResult;
 }
 
 export const deleteComment = async(commentId) => { 

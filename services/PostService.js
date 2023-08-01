@@ -51,14 +51,14 @@ export const getPosts = async (page, userId) => {
 export const createPost = async(postObj) => {
     const newPost = new Post({...postObj});
     
-    newPost.save()
+    const newPostRes = newPost.save()
         .then(savePostResult => {
             User.findByIdAndUpdate(postObj.author, { $push: { posts: savePostResult._id } })
                 .then(addPostToUserResult => { return{savePostResult, addPostToUserResult} })
-                .catch(err => console.log(err))
             return savePostResult;
         })
-        .catch((err) => console.log(err))
+
+    return newPostRes;
 }
 
 export const updatePost = async(postId,newPostObj) => {

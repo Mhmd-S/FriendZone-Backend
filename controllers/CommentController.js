@@ -59,7 +59,7 @@ export const addComment = [
 
             const data = await CommentService.addComment(postId, commentObj)
 
-            res.json({ status: "success", data: null});
+            res.json({ status: "success", data: data });
             
         } catch(err) {
             next(err);

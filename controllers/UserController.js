@@ -106,9 +106,9 @@ const createUser = [
                 errorsArray.forEach((err) => {
                   errorsObject[err.path] = err.msg;
                 });
-                return next(new AppError(400, errorsObject));
+                throw new AppError(400, errorsObject);
             }
-
+            console.log("we fuck up");
             const { username, email, password, firstName, lastName, dob } = req.body;
             const user = await UserService.createUser({ username, email, password, firstName, lastName, dob});
             res.json({ status: "success", data: user });
@@ -149,7 +149,7 @@ const updateProfile = async (req, res, next) => {
             const result = await UserService.updateProfileImages(url, 'header', req.user._id);
         } 
 
-        if(fields?.bio.trim() !== '') {
+        if(fields?.bio !== '' || fields?.bio !== undefined || fields?.bio.length > 0) {
             const result = await UserService.updateProfileBio(req.user._id, fields.bio[0]);
         }
 
@@ -224,17 +224,16 @@ const login = [
             errorsArray.forEach((err) => {
               errorsObject[err.path] = err.msg;
             });
-            return next(new AppError(400, errorsObject));
+            throw new AppError(400, errorsObject);
         }
   
         if (req.isAuthenticated()) {
-          return next(new AppError(400, {auth: 'User already logged in'}));
+            throw new AppError(400, {auth: 'User already logged in'});
         }
   
         passport.authenticate('user-local', (err, user, info) => {
             if (err) {
-                console.log(err);
-              return next(new AppError(500,  {auth: "Couldn't proccess your request. Try again later."}));
+                throw new AppError(500,  {auth: "Couldn't proccess your request. Try again later."});
             }
         
             if (!user) {
