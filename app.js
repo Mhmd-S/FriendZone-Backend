@@ -151,10 +151,12 @@ io.on('connection', (socket) => {
     }
     // Save data to the database
     try{
+      console.log(data)
     if(data.chatId === null) {
-      const result = await ChatController.createChat([userId, data.recipientId]);
+      const result = await ChatController.createChat([userId, data.recipient._id]);
+      console.log(result);
       const chatAddMessageResult = await ChatController.putChat(userId,result._id, data.message);
-
+      console.log('hellooooo')
       // Send the chatId back to the client
       socket.emit('chatId', result._id);
     } else {

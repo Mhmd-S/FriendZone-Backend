@@ -8,14 +8,14 @@ import mongoose from 'mongoose';
 export const getChat = async(req,res,next) => {
     try{
 
-        const recipientId = req.query.recipientId;
+        const chatId = req.query.chatId;
         const page = req.query.page;
  
         if (!page) next(new AppError(400, "Invalid :page parameter"));
 
         if (page < 1) next(new AppError(400, "Invalid :page parameter"));
 
-        const chat = await ChatService.getChat(recipientId, req.user._id, page);
+        const chat = await ChatService.getChat(chatId, page);
 
         res.json({ status: "success", data: chat });
     } catch (err) {
@@ -77,7 +77,8 @@ export const putChat = async(userId, chatId, message) => {
         if (chatPartcipants.participants.indexOf(userId) === -1) throw new AppError(401, "Unauthorized to access chat!");
         
         const recipient = chatPartcipants.participants[0] === userId ? chatPartcipants.participants[0] : chatPartcipants.participants[1];
-        const chat = await ChatService.getChat(recipient, userId, 1);
+
+        const chat = await ChatService.getChat(chatId   , 1);
 
         if (!chat) throw new AppError(404, "Chat not found!");
 

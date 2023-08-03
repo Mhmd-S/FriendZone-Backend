@@ -7,8 +7,8 @@ export const getParticipants = async(chatId) => {
     return result; 
 }
 
-export const getChat = async(recipientId, userId,page) => {
-    const result = await Chat.findOne({ participants: { $in: [userId, recipientId ] }}).populate({
+export const getChat = async(chatId, userId,page) => {
+    const result = await Chat.findById(chatId).populate({
         path: 'messages',
         select: 'senderId content createdAt',
         options: {
