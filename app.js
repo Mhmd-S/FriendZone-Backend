@@ -7,7 +7,6 @@ import configurePassport from './authentication/passport-config';
 import { AppError, errorHandlers } from './utils/errorHandler';
 import  MongoStore from 'connect-mongo';
 import { Server } from 'socket.io';
-const fs = require('fs');
 
 //Import Controller for the Chat to be used in sockets
 import * as ChatController from './controllers/ChatController';
