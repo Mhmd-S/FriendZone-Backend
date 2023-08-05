@@ -108,7 +108,8 @@ const createUser = [
                 });
                 throw new AppError(400, errorsObject);
             }
-            console.log("we fuck up");
+
+            
             const { username, email, password, firstName, lastName, dob } = req.body;
             const user = await UserService.createUser({ username, email, password, firstName, lastName, dob});
             res.json({ status: "success", data: user });

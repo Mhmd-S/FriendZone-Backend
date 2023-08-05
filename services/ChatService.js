@@ -12,7 +12,7 @@ export const getChat = async(chatId, userId,page) => {
         path: 'messages',
         select: 'senderId content createdAt',
         options: {
-            sort: { createdAt: -1 },
+            sort: { updatedAt: -1 },
             limit: 50,
             skip: (page-1) * 50
         },
@@ -22,12 +22,12 @@ export const getChat = async(chatId, userId,page) => {
 }
 
 export const getChats = async(userID, page) => {
-    const result = await Chat.find({ participants: { $in: [userID] } }, 'participants lastMessage')
-        .populate('participants', 'username profilePicture')
-        .populate('lastMessage', 'content updatedAt')
+    const result = await Chat.find({ participants: { $in: [userID] } }, 'participants lastMessage updatedAt')
         .sort({ updatedAt: -1 })
         .skip((page - 1) * 20)
         .limit(20)
+        .populate('participants', 'username profilePicture')
+        .populate('lastMessage', 'content updatedAt')
         .exec();
 
     return result;

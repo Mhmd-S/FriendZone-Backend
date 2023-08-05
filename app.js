@@ -134,21 +134,24 @@ io.on('connection', (socket) => {
     // Get the recipient's socket ID from the map
     const recipientSocketId = userSocketMap.get(recipientId);
 
+    data.sender = {
+      userId: userId,
+      username: socket.request.user.username,
+      profilePicture: socket.request.user.profilePicture
+    }
+    
+    data.timestamp = Date.now();
+
+    // Send to the sender.
+    socket.emit('sent-message', data);
+
     // Check if the recipient is online (has a socket connection)
     if (recipientSocketId && io.sockets.sockets.has(recipientSocketId)) {
       // Emit the message only to the intended recipient's socket
-      data.sender = {
-        userId: userId,
-        username: socket.request.user.username,
-        profilePicture: socket.request.user.profilePicture
-      }
-      data.timestamp = Date.now();
+      // Send to the recipient.
       io.to(recipientSocketId).emit('receive-message', data);
-    } else {
-      // Handle the case when the recipient is offline or not found
-      // For example, you can store the message in the database and send it later when the recipient comes online
-      console.log(`Recipient ${recipientId} is offline or not found`);
-    }
+    } 
+    
     // Save data to the database
     try{
       console.log(data)
