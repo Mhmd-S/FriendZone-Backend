@@ -118,8 +118,6 @@ io.use((socket, next) => {
 const userSocketMap = new Map();
 
 io.on('connection', (socket) => {
-  console.log('A user connected');
-
   const userId = socket.request.user._id.toString();
 
   // Store the association between user ID and socket ID in the map
@@ -154,19 +152,18 @@ io.on('connection', (socket) => {
     
     // Save data to the database
     try{
-      console.log(data)
-    if(data.chatId === null) {
-      const result = await ChatController.createChat([userId, data.recipient._id]);
-      console.log(result);
-      const chatAddMessageResult = await ChatController.putChat(userId,result._id, data.message);
-      console.log('hellooooo')
-      // Send the chatId back to the client
-      socket.emit('chatId', result._id);
-    } else {
-      const result = await ChatController.putChat(userId, data.chatId, data.message);
-    }
-  } catch(err) {
-    socket.emit('error', 'Coukd not save message to database');
+      if(data.chatId === null) {
+        const result = await ChatController.createChat([userId, data.recipient._id]);
+        console.log(result);
+        const chatAddMessageResult = await ChatController.putChat(userId,result._id, data.message);
+        console.log('hellooooo')
+        // Send the chatId back to the client
+        socket.emit('chatId', result._id);
+      } else {
+        const result = await ChatController.putChat(userId, data.chatId, data.message);
+      }
+    } catch(err) {
+      socket.emit('error', 'Coukd not save message to database');
     }
 
   });
@@ -174,12 +171,10 @@ io.on('connection', (socket) => {
   socket.on('disconnect', () => {
     // Remove the association when the socket disconnects
     userSocketMap.delete(userId);
-
-    console.log('A user disconnected');
   });
 });
 
-httpServer.listen(process.env.Port || 3001, ()=> {
+httpServer.listen(process.env.PORT || 10000, ()=> {
     console.log(`Listening at at port ${process.env.PORT}`);
 });
  
