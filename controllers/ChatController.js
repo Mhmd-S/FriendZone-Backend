@@ -7,7 +7,6 @@ import mongoose from 'mongoose';
 
 export const getChat = async(req,res,next) => {
     try{
-
         const chatId = req.query.chatId;
         const page = req.query.page;
  

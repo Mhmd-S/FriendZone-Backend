@@ -17,7 +17,6 @@ export const getChat = async(chatId, userId,page) => {
             skip: (page-1) * 50
         },
     }).exec();
-
     return result;
 }
 
