@@ -1,5 +1,3 @@
 # FriendZone-Backend
 
-FriendZone is still a premature concept. Currently I am trying to test my limits and look for my weaknesses.
-This is still a minimum viable prototype.
-This is the generall backend I will be using for the web application.
+A social media web app where you can add friends, customize you profile, instant messaging, posting posts and commenting. The front-end is built use React JS, while the backend is a REST API using Express.
