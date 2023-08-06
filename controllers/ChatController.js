@@ -1,4 +1,3 @@
-import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import User from '../models/User';
 import * as ChatService from '../services/ChatService';
