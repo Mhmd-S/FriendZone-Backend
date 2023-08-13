@@ -1,9 +1,7 @@
 import { body, validationResult } from 'express-validator';
 import { AppError } from '../utils/errorHandler';
 import * as PostService from '../services/PostService';
-import formidable from 'formidable';
-import path from  'path';
-import { uploadImage } from '../uploadio/uploadio_API';
+import { deleteObjectFromBucket, uploadPostImage } from '../utils/AWS-client';
 
 export const getPost = async(req,res,next) => {
     try {
@@ -47,57 +45,25 @@ export const getPosts = async(req,res,next) => {
 }
 
 export const createPost = [
-  body('content')
-    .exists().withMessage('Content field is required!')
-    .trim()
-    .isLength({ min: 1, max: 500 }).withMessage('Content size should be at least 1 character and a maximum of 500')
-    .escape(),
-  async (req, res, next) => {
-    try {
-      const form = formidable({
-        uploadDir: path.resolve(__dirname, '..', 'uploads'),
-        keepExtensions: true,
-      });
-      form.parse(req, async (err, fields, files) => {
-        if (err) {
-            next(new AppError(500, "Could not upload post"))
-            return;
+    body('content')
+        .exists().withMessage('Content field is required!')
+        .trim()
+        .isLength({ min: 1, max: 500 }).withMessage('Content size should be at least 1 character and a maximum of 500')
+        .escape(),
+    uploadPostImage.fields([{ name: 'postImage', maxCount: 1}]),
+    async (req,res,next) => {
+        try {       
+            const postInfo = {
+                content: req.body.content,
+                image: req.files?.postImage[0].location,
+                author: req.user._id,
+            };
+            const post = await PostService.createPost(postInfo);
+            return res.status(200).json({ status: "success", data: post });
+        } catch (err) {
+            next(err);
         }
-
-        let url = '';
-        
-        // Validate the postImage field if an image is available
-        if (files?.postImage) {
-            const imageFile = files.postImage;
-            if (!Array.isArray(imageFile) || imageFile.length !== 1) {
-                next(new AppError(400, 'Only one image file allowed'));
-                return
-            }
-
-            // Check if the uploaded file is an image
-            const acceptedFileTypes = ['image/jpeg', 'image/png', 'image/jpg'];
-            console.log(imageFile)
-            if (!acceptedFileTypes.includes(imageFile[0].mimetype)) {
-                next(new AppError(400, 'Only image files are allowed'));
-                return;
-            }
-
-            url = await uploadImage(imageFile[0], '/post_images');
-        }
-        
-        const postInfo = {
-          content: fields.content[0],
-          image: url,
-          author: req.user._id,
-        }
-
-        const post = await PostService.createPost(postInfo);
-        return res.status(200).json({ status: "success", data: post });
-      });
-    } catch (err) {
-      next(err);
     }
-  }
 ];
 
 
@@ -132,27 +98,26 @@ export const updatePost = [
 ]
 
 export const deletePost = async(req,res,next) => {
-        try {
-            console.log(123)
-            const postId = req.params.postId;
-            
-            // Verify user's owner of post
-            const post = await PostService.getPost(postId);
+    try {
+        const postId = req.params.postId;
+        
+        // Verify user's owner of post
+        const post = await PostService.getPost(postId);
 
-            if (!post) {
-                next(new AppError(400, 'Invalid :postId paramter'))
-            }
-
-            if (post.author.username !== req.user.username) {
-                next(new AppError(400,'Unauthorized action'));
-            }
-
-            await PostService.deletePost(req.user._id, postId);
-            res.status(200).json({ status:"success", data: null})
-        }catch (err) {
-            next(err);
+        if (!post) {
+            next(new AppError(400, 'Invalid :postId paramter'))
         }
+
+        if (post.author.username !== req.user.username) {
+            next(new AppError(400,'Unauthorized action'));
+        }
+        await deleteObjectFromBucket(post.image);
+        await PostService.deletePost(req.user._id, postId);
+        res.status(200).json({ status:"success", data: null})
+    }catch (err) {
+        next(err);
     }
+}
 
 
 export const likePost = async(req,res,next) => {

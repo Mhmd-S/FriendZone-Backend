@@ -3,7 +3,6 @@ import User from '../models/User';
 import * as ChatService from '../services/ChatService';
 import mongoose from 'mongoose';
 
-
 export const getChat = async(req,res,next) => {
     try{
         const chatId = req.query.chatId;

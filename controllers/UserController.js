@@ -4,9 +4,7 @@ import { AppError } from '../utils/errorHandler';
 import User from '../models/User';
 import passport from 'passport';
 import '../authentication/passport-config';
-import formidable from 'formidable';
-import path from 'path';
-import { uploadImage, deleteImage } from '../uploadio/uploadio_API';
+import {deleteObjectFromBucket, uploadUserProfileImage } from '../utils/AWS-client';
 
 const getUser = async(req,res,next) => {
     try{
@@ -119,48 +117,49 @@ const createUser = [
     }
 ];
 
-const updateProfile = async (req, res, next) => {
-    const form = formidable({
-        uploadDir: path.resolve(__dirname, '..','uploads'),
-        keepExtensions: true, 
-      });
+const updateProfile = [
+    body('bio')
+        .optional()
+        .isLength({ min: 0, max: 250 }).withMessage('Bio can only be a maximum of 250 characters')
+        .escape(),
+    uploadUserProfileImage.fields([{ name: 'profilePicture', maxCount: 1 }, { name: 'headerPicture', maxCount: 1 }]),
+    async (req, res, next) => {
 
-  form.parse(req, async (err, fields, files) => {
-    if (err) {
-        console.log(err)
-      next(new AppError(500, "Could not update user's profile"))
-    }
-
-    try {
-        if(files?.profilePicture){
-            if (req.user.profilePicture) {
-                const filePath = getParentAndDirectParentFile(req.user.profilePicture, 'profile_images'); 
-                await deleteImage(filePath);
-            }
-            const url = await uploadImage(files.profilePicture[0], '/profile_images');
-            const result = await UserService.updateProfileImages(url, 'profile', req.user._id);
+        const errors = validationResult(req);
+        if (!errors.isEmpty()){
+            throw new AppError(400, errors.array());
         }
 
-        if (files?.headerPicture) {
-            if (req.user.profilePicture) {
-                const filePath = getParentAndDirectParentFile(req.user.profileHeader, 'profile_headers'); 
-                await deleteImage(filePath);
+        try {
+            console.log(req)
+            if(req?.files && req.files?.profilePicture){
+                console.log(req.user.profilePicture)
+                if (req.user.profilePicture) {
+                    // delete picture from bucket
+                    await deleteObjectFromBucket(req.user.profilePicture);
+                }
+                await UserService.updateProfileImages(req.files.profilePicture[0].location, 'profile', req.user._id);
             }
-            const url = await uploadImage(files.headerPicture[0], '/profile_headers');
-            const result = await UserService.updateProfileImages(url, 'header', req.user._id);
-        } 
 
-        if(fields?.bio !== '' || fields?.bio !== undefined || fields?.bio.length > 0) {
-            const result = await UserService.updateProfileBio(req.user._id, fields.bio[0]);
+            if (req.files && req.files?.headerPicture) {
+                if (req.user.headerPicture) {
+                    // delete header from bucket
+                    await deleteObjectFromBucket(req.user.headerPicture);
+                }
+                await UserService.updateProfileImages(req.files.headerPicture[0].location, 'header', req.user._id);
+            } 
+
+            if(req.body?.bio !== '' || req.body?.bio !== undefined || req.body?.bio.length > 0) {
+                await UserService.updateProfileBio(req.user._id, req.body.bio);
+            }
+
+            res.status(200).json({ status: "success", data: null });
+        } catch (err) {
+            next(new AppError(500, "Could not update user's profile"))
         }
-
-      return res.status(200).json({ status: "success", data: null });
-    } catch (error) {
-        console.log(error)
-        next(new AppError(500, "Could not update user's profile"))
     }
-  });
-}; 
+]; 
+
 
 const requestFriend = async(req,res,next) => {
     // req.query.userId is the id of the user to send friend request to
