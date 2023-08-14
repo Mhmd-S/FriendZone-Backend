@@ -133,7 +133,7 @@ const updateProfile = [
         try {
             console.log(req)
             if(req?.files && req.files?.profilePicture){
-                console.log(req.user.profilePicture)
+
                 if (req.user.profilePicture) {
                     // delete picture from bucket
                     await deleteObjectFromBucket(req.user.profilePicture);

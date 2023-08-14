@@ -55,7 +55,7 @@ export const createPost = [
         try {       
             const postInfo = {
                 content: req.body.content,
-                image: req.files?.postImage[0].location,
+                image: req.files?.postImage  ? req.files?.postImage[0].location : null,
                 author: req.user._id,
             };
             const post = await PostService.createPost(postInfo);
