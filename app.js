@@ -34,7 +34,7 @@ main().catch(err => console.error("Cannot connect to database"));
 // FIx the session
 // Configs for the global middleware
 const corsOption = { // Change later. // Config for the CORS
-    'origin': ["https://13.228.225.19", "https://18.142.128.26", "https://54.254.162.138"],
+    'origin': "*",
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
     'optionsSuccessStatus': 204,
@@ -89,7 +89,7 @@ app.use((err,req,res,next) => {
 
 const io = new Server(httpServer, {
     cors: {
-        origin: ["https://13.228.225.19", "https://18.142.128.26", "https://54.254.162.138"],
+        origin: "*",
         credentials: true
     },
     connectionStateRecovery: {
