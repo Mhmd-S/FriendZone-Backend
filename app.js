@@ -59,9 +59,11 @@ const sessionMiddleware = session({
     cookie: {
         maxAge: 30 * 24 * 60 * 60, // 30 days
         sameSite: 'none', 
+        secure: true,
     },
 })
 
+app.set('trust proxy', 1);
 app.use(sessionMiddleware);
 app.use(passport.initialize());
 app.use(passport.session());
