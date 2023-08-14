@@ -149,7 +149,7 @@ const updateProfile = [
                 await UserService.updateProfileImages(req.files.headerPicture[0].location, 'header', req.user._id);
             } 
 
-            if(req.body?.bio !== '' || req.body?.bio !== undefined || req.body?.bio.length > 0) {
+            if(req.body?.bio !== '' && req.body?.bio !== undefined && req.body?.bio.length > 0) {
                 await UserService.updateProfileBio(req.user._id, req.body.bio);
             }
 
