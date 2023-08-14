@@ -34,7 +34,7 @@ main().catch(err => console.error("Cannot connect to database"));
 // FIx the session
 // Configs for the global middleware
 const corsOption = { // Change later. // Config for the CORS
-    'origin': "*",
+    'origin': "https://friendzone-jhnr.onrender.com",
     'methods': 'GET,HEAD,PUT,PATCH,POST,DELETE',
     'preflightContinue': false,
     'optionsSuccessStatus': 204,
@@ -89,7 +89,7 @@ app.use((err,req,res,next) => {
 
 const io = new Server(httpServer, {
     cors: {
-        origin: "*",
+        origin: "https://friendzone-jhnr.onrender.com",
         credentials: true
     },
     connectionStateRecovery: {
